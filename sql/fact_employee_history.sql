@@ -1,0 +1,48 @@
+-- 1) create the table (no indexes / fks)
+CREATE TABLE fact_employee_history (
+  history_fact_key BIGINT AUTO_INCREMENT,
+  employee_key BIGINT NOT NULL,
+  person_master_id BIGINT,
+  company_key INT NOT NULL,
+  department_key INT,
+  position_key INT,
+  grade_key INT,
+  level_key INT,
+  begin_date DATE NOT NULL,
+  end_date DATE,
+  source_system_code VARCHAR(50) NOT NULL,
+  source_history_id VARCHAR(50),
+  source_employee_id VARCHAR(50) NOT NULL,
+  source_order_id VARCHAR(50),
+  order_type VARCHAR(50),
+  order_number VARCHAR(100),
+  level_number INT,
+  base_wage DECIMAL(18,2),
+  base_wage_currency VARCHAR(3) DEFAULT 'MNT',
+  total_wage DECIMAL(18,2),
+  evolve_wage DECIMAL(18,2),
+  calc_percent DECIMAL(5,2),
+  insurance_type_id INT,
+  labour_condition VARCHAR(100),
+  is_multiple TINYINT(1) DEFAULT 0,
+  multiple_years INT,
+  is_current_position TINYINT(1) DEFAULT 0,
+  is_active_employment TINYINT(1) DEFAULT 1,
+  source_created_date DATETIME,
+  source_updated_date DATETIME,
+  source_timestamp BIGINT,
+  dw_created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  dw_updated_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  etl_batch_id BIGINT NOT NULL,
+  PRIMARY KEY (history_fact_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+ALTER TABLE fact_employee_history
+  ADD INDEX idx_employee (employee_key, begin_date),
+  ADD INDEX idx_company (company_key, begin_date),
+  ADD INDEX idx_department (department_key, begin_date),
+  ADD INDEX idx_position (position_key, begin_date),
+  ADD INDEX idx_current_active (is_current_position, is_active_employment),
+  ADD INDEX idx_source_history (source_system_code, source_history_id),
+  ADD INDEX idx_order (order_type, begin_date);
