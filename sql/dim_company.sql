@@ -9,6 +9,7 @@ CREATE TABLE dwh_hr.dim_company (
     dw_created_date DATETIME NOT NULL DEFAULT GETDATE(),
     dw_updated_date DATETIME NOT NULL DEFAULT GETDATE()
 );
+
 -- create schema dwh_hr;
 -- select * from dwh_hr.dim_company
 -- delete from dwh_hr.dim_company where company_code='MCSPOWER';
