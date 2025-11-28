@@ -1,189 +1,245 @@
-SELECT t.code,t.FIRSTNAME ,t.LASTNAME ,h.HISTORYID ,--d.*,
-c.name AS company,d.name AS department,di.name AS division,p.name AS position,le.name AS leveln,
-h.begindate,h.enddate, h.LABOURCONDITION 
---,h.* 
-FROM 
-HRMS_PROD.TBLEMPLOYEE t,
-HRMS_PROD.TBLEMPEMPLHIST h ,
-hrms_prod.tblcompany c,
-hrms_prod.tbldepartment d ,
-HRMS_PROD.tblposition p,
-hrms_prod.SIDIVISION di,
-hrms_prod.silevel le
-WHERE t.EMPID  in(
-6366,
-6117,
-15448,
-25711,
-6369,
-11405
+--------------- Employee history ------------------
+SELECT
+    t.code,
+    t.firstname,
+    t.lastname,
+    h.historyid,
+    c.name AS company,
+    d.name AS department,
+    di.name AS division,
+    p.name AS position,
+    le.name AS leveln,
+    h.begindate,
+    h.enddate,
+    h.labourcondition
+FROM hrms_prod.tblemployee t
+JOIN hrms_prod.tblempemplhist h
+    ON t.empid = h.empid
+LEFT JOIN hrms_prod.tblcompany c
+    ON h.companyid = c.companyid
+LEFT JOIN hrms_prod.tbldepartment d
+    ON h.depid = d.depid
+LEFT JOIN hrms_prod.sidivision di
+    ON t.divisionid = di.divisionid
+LEFT JOIN hrms_prod.tblposition p
+    ON h.positionid = p.positionid
+LEFT JOIN hrms_prod.silevel le
+    ON h.levelid = le.levelid
+WHERE t.empid IN (
+    6366, 6117, 15448, 25711, 6369, 11405
 )
-AND t.empid=h.empid
-AND h.companyid=c.companyid
+ORDER BY t.firstname, h.historyid;
 
-AND h.companyid=c.companyid(+)
-AND h.depid=d.depid(+)
-AND t.divisionid=di.DIVISIONid(+)
-AND h.positionid=p.positionid(+)
-AND h.levelid=le.levelid(+)
-ORDER BY t.firstname,h.HISTORYID 
 
-#######  Education ###############
-SELECT em.firstname,
-e.fromdate,e.todate,co.name country,un.name UNIVERSITY,l.NAME EDUCATIONLEVEL,pr.name PROFESSION,
-e.gpa,e.certificateno
-FROM HRMS_PROD.HREMPEDUCATION e ,
-HRMS_PROD.SIEDUCATIONLEVEL l,
-HRMS_PROD.sieducationtype et,
-HRMS_PROD.SIPROFESSION pr,
-HRMS_PROD.SIUNIVERSITY un,
-hrms_prod.SIDIVISION di,
-hrms_prod.sicountry co,
-hrms_prod.tblemployee em
-WHERE e.EDUCATIONLEVELID = l.EDUCATIONLEVELID
-AND e.EMPID  in(
-6366,
-6117,
-15448,
-25711,
-6369,
-11405
+--------------- Education  ------------------
+
+SELECT
+    em.firstname,
+    e.fromdate,
+    e.todate,
+    co.name AS country,
+    un.name AS university,
+    l.name AS educationlevel,
+    pr.name AS profession,
+    e.gpa,
+    e.certificateno
+FROM hrms_prod.hrempeducation e
+JOIN hrms_prod.sieducationlevel l
+    ON e.educationlevelid = l.educationlevelid
+JOIN hrms_prod.sieducationtype et
+    ON et.educationtypeid = e.educationtypeid
+JOIN hrms_prod.siprofession pr
+    ON pr.professionid = e.professionid
+JOIN hrms_prod.siuniversity un
+    ON un.universityid = e.universityid
+JOIN hrms_prod.sicountry co
+    ON co.countryid = e.countryid
+JOIN hrms_prod.sidivision di
+    ON di.divisionid = e.divisionid
+JOIN hrms_prod.tblemployee em
+    ON em.empid = e.empid
+WHERE e.empid IN (
+    6366, 6117, 15448, 25711, 6369, 11405
 )
-AND et.educationtypeid = e.educationtypeid 
-AND pr.professionid = e.professionid 
-AND un.universityid = e.universityid 
-AND co.countryid = e.countryid 
-AND di.divisionid = e.divisionid 
-AND em.empid = e.empid 
-ORDER BY em.FIRSTNAME 
+ORDER BY em.firstname;
 
 
 
+--------------- Training  ------------------
 
-
-SELECT 
-    em.EMPID,
-    em.FIRSTNAME,
-    em.LASTNAME,
+SELECT
+    em.empid,
+    em.firstname,
+    em.lastname,
     st.trainingid,
-
-    -- Бодит сургалтын огноо
-    rt.begindate AS SURGALT_EHLEH_OGNOO,
-    rt.ENDDATE   AS SURGALT_DUUSAH_OGNOO,
-    -- Сургалтын нэр
-    st.name AS SURGALT_NER,
-
-    -- Сургалтын төлөвлөгөөт огноо (if exists)
-   -- et.PLANDATE AS TULUULSEN_OGNOO,
-
-    -- Суух ёстой цаг
-    st.duration AS SUUH_YOSTOI_TSAG,
-
-    -- Суусан цаг (real training)
-    rt.duration AS SUUSAN_TSAG,
-    
---    -- Нийт төлбөр (sum)
-    ex.TOTAL_EXPENSE AS TULBUR,
-    
-
-    -- Сургалтын үнэлгээ
-    ev.SCORE AS UNELGEE,
-    -- Сургалтын хэлбэр
-    tm.name AS SURGALT_HELBER,
-
-    -- Сургалтын төрөл
-    sc.NAME AS SURGALT_TURUL,
-
-    -- Сургалтын хөтөлбөр
-    --pl.name AS SURGALT_HUTULBUR,
-    -- Сургалт явуулсан байгууллага
-    ce.NAME AS SURGALTIIN_BAIGUULLAGA,
-    sk.skillid,sk.trainingid,
-    -- Сургалтын ангилал
-    sl.NAME AS SURGALT_ANGILAL
-FROM HRMS_PROD.HREMPTRAINING et
-JOIN HRMS_PROD.TBLEMPLOYEE em 
-        ON em.EMPID = et.EMPID
-
--- TRAINING MASTER
-JOIN HRMS_PROD.SITRAINING st 
-        ON et.TRAININGID = st.TRAININGID
-
--- REAL TRAINING EVENT
-LEFT JOIN  HRMS_PROD.HRREALTRAINING rt
-        ON et.REALTRAININGID = rt.REALTRAININGID
+    rt.begindate AS surgalt_ehleh_ognoo,
+    rt.enddate   AS surgalt_duusah_ognoo,
+    st.name      AS surgalt_ner,
+    st.duration  AS suuh_yostoi_tsag,
+    rt.duration  AS suusan_tsag,
+    ex.total_expense AS tulbur,
+    ev.score AS unelgee,
+    tm.name AS surgalt_helber,
+    sc.name AS surgalt_turul,
+    ce.name AS surgalt_baiguullaga,
+    sk.skillid,
+    sk.trainingid,
+    sl.name AS surgalt_angilal
+FROM hrms_prod.hremptraining et
+JOIN hrms_prod.tblemployee em
+    ON em.empid = et.empid
+JOIN hrms_prod.sitraining st
+    ON et.trainingid = st.trainingid
+LEFT JOIN hrms_prod.hrrealtraining rt
+    ON et.realtrainingid = rt.realtrainingid
 LEFT JOIN (
-    SELECT 
-        re.REALTRAININGID,
-        SUM(re.EXPENSE) AS TOTAL_EXPENSE
-    FROM HRMS_PROD.HRREALTREXPENSE re
-    JOIN HRMS_PROD.SITRAININGEXPENSE se
-         ON re.TRAININGEXPENSEID = se.TRAININGEXPENSEID
-    GROUP BY re.REALTRAININGID
-) ex ON ex.REALTRAININGID = et.REALTRAININGID
--- EVALUATION
-LEFT JOIN HRMS_PROD.HRREALTREVAL ev
-        ON et.REALTRAININGID = ev.REALTRAININGID
-
-        --SELECT * FROM  HRMS_PROD.HRTRAININGPLAN rt
--- TRAINING MODE
-LEFT JOIN HRMS_PROD.HRTRAININGMODE tm
-        ON st.TRAININGMODEID = tm.TRAININGMODEID
-
--- TRAINING CLASS
-LEFT JOIN HRMS_PROD.SITRAININGCLASS sc
-        ON st.TRAININGCLASSID = sc.TRAININGCLASSID
--- TRAINING SKILL
-LEFT JOIN HRMS_PROD.SITRAININGSKILL sk
-        ON st.TRAININGID = sk.TRAININGID
-LEFT JOIN HRMS_PROD.SISKILL sl
-        ON  sk.SKILLID =sl.SKILLID 
-        
---LEFT JOIN HRMS_PROD.HRTRAININGPLANDTL pl
---        ON et.TRAININGID = pl.TRAININGID
-        
--- EDUCATION CENTER
-LEFT JOIN HRMS_PROD.SIEDUCATIONCENTER ce
-        ON st.EDUCENTERID = ce.EDUCENTERID
-WHERE 
-et.EMPID  in(
-6366,
-6117,
-15448,
-25711,
-6369,
-11405
-)
+    SELECT
+        re.realtrainingid,
+        SUM(re.expense) AS total_expense
+    FROM hrms_prod.hrrealtrexpense re
+    JOIN hrms_prod.sitrainingexpense se
+        ON re.trainingexpenseid = se.trainingexpenseid
+    GROUP BY re.realtrainingid
+) ex
+    ON ex.realtrainingid = et.realtrainingid
+LEFT JOIN hrms_prod.hrrealtreval ev
+    ON et.realtrainingid = ev.realtrainingid
+LEFT JOIN hrms_prod.hrtrainingmode tm
+    ON st.trainingmodeid = tm.trainingmodeid
+LEFT JOIN hrms_prod.sitrainingclass sc
+    ON st.trainingclassid = sc.trainingclassid
+LEFT JOIN hrms_prod.sitrainingskill sk
+    ON st.trainingid = sk.trainingid
+LEFT JOIN hrms_prod.siskill sl
+    ON sk.skillid = sl.skillid
+LEFT JOIN hrms_prod.sieducationcenter ce
+    ON st.educenterid = ce.educenterid
+WHERE et.empid IN (
+    6366, 6117, 15448, 25711, 6369, 11405
+);
 
 
 
+--------------- Foreign Language Skills  ------------------
+
+SELECT
+    em.entryid,
+    em.empid,
+    em.forlanguageid,
+    l.name AS language,
+    leLis.name AS listeninglevel,
+    leSpe.name AS speakinglevel,
+    leRead.name AS readinglevel,
+    leWrit.name AS writinglevel
+FROM hrms_prod.hrempforlanguage em
+LEFT JOIN hrms_prod.siforlanguage l
+    ON em.forlanguageid = l.forlanguageid
+LEFT JOIN hrms_prod.siforlanguagelevel leLis
+    ON em.listeninglevelid = leLis.forlanguagelevelid
+LEFT JOIN hrms_prod.siforlanguagelevel leSpe
+    ON em.speakinglevelid = leSpe.forlanguagelevelid
+LEFT JOIN hrms_prod.siforlanguagelevel leRead
+    ON em.readinglevelid = leRead.forlanguagelevelid
+LEFT JOIN hrms_prod.siforlanguagelevel leWrit
+    ON em.writinglevelid = leWrit.forlanguagelevelid
+WHERE em.empid IN (
+    6366, 6117, 15448, 25711, 6369, 11405
+);
 
 
-SELECT em.entryid, em.empid, em.FORLANGUAGEID ,l.name
-,leLis.name listeningLevel
-,leSpe.name SpeakingLevel
-,leRead.name ReadingLevel
-,leWrit.name WritingLevel
-FROM 
-HRMS_PROD.HREMPFORLANGUAGE em,
-HRMS_PROD.SIFORLANGUAGE l,
-HRMS_PROD.SIFORLANGUAGELEVEL leLis,
-HRMS_PROD.SIFORLANGUAGELEVEL leSpe,
-HRMS_PROD.SIFORLANGUAGELEVEL leRead,
-HRMS_PROD.SIFORLANGUAGELEVEL leWrit
-WHERE 
---em.empid = l.empid AND 
-em.forlanguageid = l.forlanguageid(+)
-AND em.LISTENINGLEVELID = leLis.forlanguagelevelid(+)
-AND em.SPEAKINGLEVELID  = leSpe.forlanguagelevelid(+)
-AND em.READINGLEVELID  = leRead.forlanguagelevelid(+)
-AND em.WRITINGLEVELID  = leWrit.forlanguagelevelid(+)
-AND  em.EMPID  in(
-6366,
-6117,
-15448,
-25711,
-6369,
-11405
-)
+
+
+-----------Family Members ------------
+
+
+SELECT
+    r.name,
+    f.lastname,
+    f.firstname,
+    f.famregno,
+    f.birthdate,
+    f.professionid,
+    f.jobid,
+    f.orgname,
+    f.note,
+    f.phone
+FROM hrms_prod.hrempfamily f
+JOIN hrms_prod.sirelative r
+    ON f.relativeid = r.relativeid
+WHERE f.empid IN (
+    6366, 6117, 15448, 25711, 6369, 11405
+);
+
+
+
+
+-----------job + profession name ------------
+SELECT
+    r.name,
+    f.lastname,
+    f.firstname,
+    f.famregno,
+    f.birthdate,
+    f.professionid,
+    pr.name AS profname,
+    f.jobid,
+    j.name AS jobname,
+    f.orgname,
+    f.note,
+    f.phone
+FROM hrms_prod.hrempfamily f
+JOIN hrms_prod.sirelative r
+    ON f.relativeid = r.relativeid
+JOIN hrms_prod.sijob j
+    ON f.jobid = j.jobid
+JOIN hrms_prod.sijobtype jt
+    ON j.jobtypeid = jt.jobtypeid
+JOIN hrms_prod.siprofession pr
+    ON f.professionid = pr.professionid
+WHERE f.empid IN (
+    6366, 6117, 15448, 25711, 6369, 11405
+);
+
+
+
+-----------AWARD ------------
+
+SELECT
+    a.orderid,
+    a.awarddate,
+    a.amount,
+    a.note,
+    ad.name AS adtype,
+    re.name AS reason,
+    e.companyid,
+    c.name AS compname
+FROM hrms_prod.hrorderaward a
+JOIN hrms_prod.sihradtype ad
+    ON a.adtypeid = ad.adtypeid
+JOIN hrms_prod.sihrreason re
+    ON a.reasons = TO_CHAR(re.reasonid)
+JOIN hrms_prod.tblemployee e
+    ON a.empid = e.empid
+JOIN hrms_prod.tblcompany c
+    ON e.companyid = c.companyid;
+
+
+-----------Certificates ------------
+
+SELECT
+    ec.certificateid,
+    ec.certificateno,
+    ec.certificatedate,
+    ec.note,
+    s.certificateid,
+    s.name AS certficatename,
+    s.code AS code,
+    st.name AS typename,
+    st.code AS typecode,
+    ec.expirydate
+FROM hrms_prod.hrempcertificate ec
+JOIN hrms_prod.sicertificate s
+    ON ec.certificateid = s.certificateid
+JOIN hrms_prod.sicertificatetype st
+    ON s.certificatetypeid = st.certificatetypeid;
 
