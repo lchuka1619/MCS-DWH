@@ -1,3 +1,4 @@
+
 CREATE TABLE dwh_hr.fact_employee_history (
     history_fact_key BIGINT IDENTITY(1,1) PRIMARY KEY,
 
@@ -68,6 +69,18 @@ ALTER TABLE dwh_hr.fact_employee_history
 ADD CONSTRAINT fk_fact_dim_level
 FOREIGN KEY (level_key)
 REFERENCES dwh_hr.dim_level (level_key);
+
+-- Add date foreign keys to fact tables
+ALTER TABLE dwh_hr.fact_employee_history 
+ADD begin_date_key INT,
+    end_date_key INT;
+
+
+
+-- Add foreign key constraints
+ALTER TABLE dwh_hr.fact_employee_history
+ADD CONSTRAINT FK_fact_employee_history_begin_date 
+    FOREIGN KEY (begin_date_key) REFERENCES dwh_hr.dim_date(date_key);
 
 
 CREATE INDEX idx_fact_emp_employee_key ON dwh_hr.fact_employee_history(employee_key);
