@@ -1,0 +1,85 @@
+{
+	"name": "ADLS_Staging_SILEVEL",
+	"properties": {
+		"folder": {
+			"name": "HR"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "csv_SILEVEL",
+						"type": "DatasetReference"
+					},
+					"name": "source1",
+					"description": "Import data from SILEVEL"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ADLS_Staging_SILEVEL",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "selectRequiredFields"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     cwfilename as string (\"SILEVEL\")",
+				"}",
+				"source(output(",
+				"          LEVELID as short,",
+				"          CODE as string,",
+				"          NAME as string,",
+				"          ISACTIVE as boolean,",
+				"          CREATED as string,",
+				"          CREATEDBY as string,",
+				"          UPDATED as string,",
+				"          UPDATEDBY as string,",
+				"          IPADDRESS as string,",
+				"          MACADDRESS as string,",
+				"          TSTAMP as string,",
+				"          MASTERID as boolean,",
+				"          ISMASTER as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"source1 select(mapColumn(",
+				"          LEVELID,",
+				"          CODE,",
+				"          NAME,",
+				"          ISACTIVE,",
+				"          CREATED,",
+				"          UPDATED",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectRequiredFields",
+				"selectRequiredFields sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          LEVELID as short,",
+				"          CODE as string,",
+				"          NAME as string,",
+				"          ISACTIVE as boolean,",
+				"          CREATED as string,",
+				"          UPDATED as string",
+				"     ),",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}

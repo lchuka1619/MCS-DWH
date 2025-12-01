@@ -1,0 +1,186 @@
+{
+	"name": "dwh_df_employee",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Dataset_Source",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "Dataset_Source",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Dataset_Sink",
+						"type": "DatasetReference"
+					},
+					"name": "sink1",
+					"rejectedDataLinkedService": {
+						"referenceName": "linkedService_err",
+						"type": "LinkedServiceReference"
+					}
+				}
+			],
+			"transformations": [
+				{
+					"name": "join1"
+				},
+				{
+					"name": "sourcesystemcode"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          EMPID as decimal(20,0),",
+				"          CODE as string,",
+				"          FAMILYNAME as string,",
+				"          LASTNAME as string,",
+				"          FIRSTNAME as string,",
+				"          GENDER as string,",
+				"          BIRTHDATE as string,",
+				"          BIRTHCOUNTRYID as long,",
+				"          BIRTHDIVISIONID as long,",
+				"          BIRTHDISTRICTID as long,",
+				"          BIRTHPLACE as string,",
+				"          COUNTRYID as long,",
+				"          DIVISIONID as long,",
+				"          DISTRICTID as long,",
+				"          NATIONALITYID as long,",
+				"          SOCIALORIGINID as long,",
+				"          MARITALSTATUS as string,",
+				"          BLOODGROUP as string,",
+				"          REGNO as string,",
+				"          PASSNO as string,",
+				"          FORPASSNO as string,",
+				"          EMDNO as string,",
+				"          NDDNO as string,",
+				"          ADDR1 as string,",
+				"          ADDR2 as string,",
+				"          HOMEPHONE as string,",
+				"          MOBILEPHONE as string,",
+				"          WORKPHONE as string,",
+				"          WORKPHONEEXT as string,",
+				"          FAX as string,",
+				"          EMAIL as string,",
+				"          POSTADDRESS as string,",
+				"          CONTACTNAME as string,",
+				"          CONTACTPHONE as string,",
+				"          WITHPICTURE as string,",
+				"          STATUS as string,",
+				"          CREATED as string,",
+				"          CREATEDBY as string,",
+				"          UPDATED as string,",
+				"          UPDATEDBY as string,",
+				"          IPADDRESS as string,",
+				"          MACADDRESS as string,",
+				"          TSTAMP as timestamp,",
+				"          COMPANYID as string,",
+				"          STATUSDATE as string,",
+				"          LASTNAMELENGTH as decimal(38,0),",
+				"          EMAIL2 as string,",
+				"          CONTACTNAME2 as string,",
+				"          CONTACTPHONE2 as string,",
+				"          ISBLACKLISTED as string,",
+				"          BLACKLISTREASON as string,",
+				"          BLACKLISTEDDATE as string,",
+				"          ISFOREIGNER as string,",
+				"          CONTACTID as long,",
+				"          MILITARYSERVED as string,",
+				"          TRAININGSPORT as string,",
+				"          INTEREST as string,",
+				"          APPID as long,",
+				"          MILITARYNO as string,",
+				"          RELATIVEID as long,",
+				"          RELATIVEID2 as long,",
+				"          MILITARYCLOSETYPE as string,",
+				"          MILITARYCOMMENT as string,",
+				"          LINKEDIN as string,",
+				"          FACEBOOK as string,",
+				"          TWITTER as string,",
+				"          ISSPYOATH as string,",
+				"          SPYOATHDATE as string,",
+				"          ISGOVERNMENTOATH as string,",
+				"          GOVERNMENTOATHDATE as string,",
+				"          ISMILITARYOATH as string,",
+				"          MILITARYOATHDATE as string,",
+				"          LINKID as string,",
+				"          ISRESIDENT as string,",
+				"          CIVILID as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"source(output(",
+				"          company_key as integer,",
+				"          company_code as string,",
+				"          company_name as string,",
+				"          is_active as boolean,",
+				"          source_system_code as string,",
+				"          source_created_date as timestamp,",
+				"          source_updated_date as timestamp,",
+				"          dw_created_date as timestamp,",
+				"          dw_updated_date as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source2",
+				"source1, source2 join(COMPANYID == company_code,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 derive(COMPANYID = iif(isNull(COMPANYID), 'MCK', COMPANYID),",
+				"          source_system_code = 0,",
+				"          company_key = company_key,",
+				"          source_employee_id = EMPID,",
+				"          employee_code = CODE,",
+				"          registration_number = REGNO,",
+				"          family_name = FAMILYNAME,",
+				"          last_name = LASTNAME,",
+				"          first_name = FIRSTNAME,",
+				"          gender = GENDER,",
+				"          birth_date = toTimestamp(BIRTHDATE, 'yyyy.MM.dd'),",
+				"          nationality_id = NATIONALITYID,",
+				"          employment_status = STATUS) ~> sourcesystemcode",
+				"sourcesystemcode derive(effective_start_date = iif(         isNull(CREATED) || trim(CREATED)=='' || CREATED=='0000-00-00 00:00:00',         currentUTC(),         toTimestamp(CREATED, 'yyyy.MM.dd HH:mm:ss')     ),",
+				"          effective_end_date = iif(isNull(UPDATED) || trim(UPDATED)=='' || UPDATED=='0000-00-00 00:00:00',         toTimestamp('9999-12-31 23:59:59', 'yyyy-MM-dd HH:mm:ss'),         toTimestamp(UPDATED, 'yyyy.MM.dd HH:mm:ss')     ),",
+				"          is_current_record = toInteger(1),",
+				"          dw_created_date = currentTimestamp(),",
+				"          dw_updated_date = currentTimestamp(),",
+				"          source_created_date = iif(isNull(CREATED), currentUTC(), toTimestamp(CREATED, 'yyyy.MM.dd HH:mm:ss')),",
+				"          source_updated_date = iif(isNull(UPDATED), toTimestamp('9999-12-31T00:00:00Z'), toTimestamp(UPDATED, 'yyyy.MM.dd HH:mm:ss'))) ~> select1",
+				"select1 alterRow(upsertIf(!isNull(source_employee_id))) ~> alterRow1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:true,",
+				"     keys:['source_employee_id'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+			]
+		}
+	}
+}

@@ -1,0 +1,183 @@
+{
+	"name": "CC_Customer_Filtered_to_DWH",
+	"properties": {
+		"folder": {
+			"name": "CC"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ADLS_Filtered_CSV",
+						"type": "DatasetReference"
+					},
+					"name": "ccCustomerFiltered",
+					"description": "ADLS deerh fmcg-filtered container-ees cc_dwh_filtered/cc_dwh_customer_full.csv datag avah process. Ene ni customer datag aguulsan bga"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DWH_Mysql",
+						"type": "DatasetReference"
+					},
+					"name": "ccCustomerDWH"
+				},
+				{
+					"dataset": {
+						"referenceName": "DWH_Mysql",
+						"type": "DatasetReference"
+					},
+					"name": "ccTradeShopDWH"
+				}
+			],
+			"transformations": [
+				{
+					"name": "CustomerTable",
+					"description": "customer_register (INN), customer_cc_id(OwnerID)-aar groupleed uldsen medeelluudiig aggregate hiigeed customer table gargaj avna."
+				},
+				{
+					"name": "AlterCustomerTable",
+					"description": "Database ruu upsert hiih bolomjiig bii bolgoh"
+				},
+				{
+					"name": "notNullCustomers",
+					"description": "0 (null) registertei bas null owner_id-tai hariltsagchdiig ylgaj avah"
+				},
+				{
+					"name": "CustomerInfoFix",
+					"description": "Customer register ni null, esvel formataas zursun uyd tuuniig '0' bolgoh, format ni 7 orontoi too esvel hunii RD bh ystoi"
+				},
+				{
+					"name": "TradeShopTable",
+					"description": "niit medeellees tradeshop-iin medeelel gargan avch DWH ruu hadgalah"
+				},
+				{
+					"name": "FilterOutUnknownTradeshops"
+				},
+				{
+					"name": "TradeshopFix",
+					"description": "trade_shop_cc_id (cusid)-n utga null bgaa tohioldold nuguuguur ni nuhuh, esvel 0-eer nuhnu"
+				},
+				{
+					"name": "GroupByTradeshop",
+					"description": "Tradeshop datagaa trade_shop_cc_id columnaar grouplej davhardliig arilgana"
+				},
+				{
+					"name": "AlterTradeShopTable"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          cusid_cc as integer,",
+				"          trade_shop_name as string,",
+				"          full_address as string,",
+				"          customer_cc_id as integer,",
+				"          customer_name as string,",
+				"          golden_flag as string,",
+				"          store_type as string,",
+				"          customer_register as string,",
+				"          phone_number as string,",
+				"          buying_power as string,",
+				"          location_segment as short,",
+				"          channel as string,",
+				"          sub_channel as string,",
+				"          sales_team as string,",
+				"          delivery_area as string,",
+				"          channel_id as integer,",
+				"          district as string,",
+				"          khoroo as short,",
+				"          customer_created_date as string,",
+				"          longitude as double,",
+				"          latitude as double",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> ccCustomerFiltered",
+				"notNullCustomers@notNullCustomers aggregate(groupBy(customer_register,",
+				"          customer_cc_id),",
+				"     customer_name = iifNull(min(customer_name), min(trade_shop_name)),",
+				"          full_address = min(full_address),",
+				"          is_reliable_register = iif(min(customer_register) == '0', 0, 1),",
+				"          golden_flag = max(golden_flag),",
+				"          register_type = iif(regexMatch(min(customer_register),  `^\\d+$`), 1,  0),",
+				"          phone_number = max(phone_number),",
+				"          customer_created_date = min(customer_created_date)) ~> CustomerTable",
+				"CustomerTable alterRow(upsertIf(true())) ~> AlterCustomerTable",
+				"CustomerInfoFix split(!and(customer_register == '0', isNull(customer_cc_id)),",
+				"     disjoint: false) ~> notNullCustomers@(notNullCustomers, nullCustomers)",
+				"ccCustomerFiltered derive(customer_register = trim(iif(length(customer_register) <= 6, '0', iifNull(customer_register, '0'))),",
+				"          register_fixed = iif(length(customer_register) <= 6, 1, iif(customer_register == '1000000', 1, 0))) ~> CustomerInfoFix",
+				"CustomerInfoFix select(mapColumn(",
+				"          trade_shop_cc_id = cusid_cc,",
+				"          trade_shop_name,",
+				"          customer_cc_id,",
+				"          customer_register,",
+				"          full_address,",
+				"          longitude,",
+				"          latitude,",
+				"          phone_number,",
+				"          location_segment,",
+				"          e_group_name = channel,",
+				"          store_type,",
+				"          buying_power,",
+				"          sub_channel,",
+				"          sales_team,",
+				"          delivery_area,",
+				"          channel_id,",
+				"          district_subcity = district,",
+				"          sub_district_block = khoroo,",
+				"          trade_shop_created_date = customer_created_date",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> TradeShopTable",
+				"TradeShopTable filter(!isNull(trade_shop_cc_id)) ~> FilterOutUnknownTradeshops",
+				"FilterOutUnknownTradeshops derive(trade_shop_cc_id = iifNull(trade_shop_cc_id, 0),",
+				"          is_reliable_trade_shop_cc_id = iif(isNull(trade_shop_cc_id), 0, 1)) ~> TradeshopFix",
+				"TradeshopFix aggregate(groupBy(trade_shop_cc_id),",
+				"     trade_shop_name = max(trade_shop_name),",
+				"          is_reliable_trade_shop_ag_id = max(is_reliable_trade_shop_cc_id),",
+				"          full_address = max(full_address),",
+				"          longitude = first(longitude),",
+				"          latitude = first(latitude),",
+				"          phone_number = max(phone_number),",
+				"          store_type = max(store_type),",
+				"          trade_shop_created_date = min(trade_shop_created_date),",
+				"          customer_register = max(customer_register),",
+				"          customer_cc_id = max(customer_cc_id),",
+				"          location_segment = max(location_segment),",
+				"          e_group_name = max(e_group_name),",
+				"          buying_power = max(buying_power),",
+				"          sub_channel = max(sub_channel),",
+				"          sales_team = max(sales_team),",
+				"          delivery_area = max(delivery_area),",
+				"          channel_id = max(channel_id),",
+				"          district_subcity = max(district_subcity),",
+				"          sub_district_block = max(sub_district_block)) ~> GroupByTradeshop",
+				"GroupByTradeshop alterRow(upsertIf(true())) ~> AlterTradeShopTable",
+				"AlterCustomerTable sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:true,",
+				"     keys:['customer_register','customer_cc_id'],",
+				"     format: 'table',",
+				"     batchSize: 5000,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> ccCustomerDWH",
+				"AlterTradeShopTable sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:true,",
+				"     keys:['trade_shop_cc_id'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> ccTradeShopDWH"
+			]
+		}
+	}
+}

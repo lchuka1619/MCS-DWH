@@ -1,0 +1,71 @@
+{
+	"name": "dwh_pl_employee_history",
+	"properties": {
+		"activities": [
+			{
+				"name": "dwh_df_employee_history",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dwh_df_employee_history",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"employeeHist": {
+								"tableName": "TBLEMPEMPLHIST",
+								"schema": "HRMS_PROD"
+							},
+							"company": {
+								"tableName": "dim_company",
+								"schema": "dwh_hr"
+							},
+							"employee": {
+								"tableName": "dim_employee",
+								"schema": "dwh_hr"
+							},
+							"department": {
+								"tableName": "dim_department",
+								"schema": "dwh_hr"
+							},
+							"position": {
+								"tableName": "dim_position",
+								"schema": "dwh_hr"
+							},
+							"grade": {
+								"tableName": "dim_grade",
+								"schema": "dwh_hr"
+							},
+							"level": {
+								"tableName": "dim_level",
+								"schema": "dwh_hr"
+							},
+							"sink1": {
+								"tableName": "fact_employee_history",
+								"schema": "dwh_hr"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"folder": {
+			"name": "HR Pipelines/DW"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-11-27T09:26:10Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

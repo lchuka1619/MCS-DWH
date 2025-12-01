@@ -1,0 +1,126 @@
+{
+	"name": "ADLS_Staging_TBLPOSITION",
+	"properties": {
+		"folder": {
+			"name": "HR"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "TBLEMPEMPLHIST_csv",
+						"type": "DatasetReference"
+					},
+					"name": "source1",
+					"description": "Import data from TBLPOSITION"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ADLS_Staging",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "selectRequiredFields"
+				},
+				{
+					"name": "filter1"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     cwfilename as string (\"TBLPOSITION\")",
+				"}",
+				"source(output(",
+				"          POSITIONID as short,",
+				"          COMPANYID as string,",
+				"          DEPID as short,",
+				"          POSGROUPID as short,",
+				"          CODE as string,",
+				"          NAME as string,",
+				"          EMPLOYMENTTYPEID as short,",
+				"          GRADEID as short,",
+				"          DIRECTPOSITIONID as string,",
+				"          NONDIRECTPOSITIONID as string,",
+				"          REPORTPOSITIONID as string,",
+				"          GOAL as string,",
+				"          CHARACTERISTIC as string,",
+				"          VACANCYDAYS as short,",
+				"          LABOURCONDITION as string,",
+				"          ISACTIVE as boolean,",
+				"          CREATED as string,",
+				"          CREATEDBY as string,",
+				"          UPDATED as string,",
+				"          UPDATEDBY as string,",
+				"          IPADDRESS as string,",
+				"          MACADDRESS as string,",
+				"          TSTAMP as string,",
+				"          JOBDESCID as short,",
+				"          JOBID as short,",
+				"          TYPE as string,",
+				"          POSITIONOCCID as short,",
+				"          POSLEVEL as short,",
+				"          JDECOSTCENTER as string,",
+				"          JDE_F0006_CO as string,",
+				"          JDE_F0006_RP01 as string,",
+				"          JDE_F0006_RP02 as string,",
+				"          POSCATEGORYID as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"filter1 select(mapColumn(",
+				"          POSITIONID,",
+				"          COMPANYID,",
+				"          DEPID,",
+				"          POSGROUPID,",
+				"          CODE,",
+				"          NAME,",
+				"          EMPLOYMENTTYPEID,",
+				"          GRADEID,",
+				"          VACANCYDAYS,",
+				"          LABOURCONDITION,",
+				"          ISACTIVE,",
+				"          CREATED,",
+				"          UPDATED,",
+				"          JOBDESCID,",
+				"          JOBID,",
+				"          TYPE,",
+				"          POSITIONOCCID,",
+				"          POSLEVEL",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectRequiredFields",
+				"source1 filter(!isNull(POSITIONID)) ~> filter1",
+				"selectRequiredFields sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          DEPID as short,",
+				"          DEPCODE as string,",
+				"          NAME as string,",
+				"          ISACTIVE as boolean,",
+				"          PARENTID as string,",
+				"          CREATED as string,",
+				"          UPDATED as string,",
+				"          COMPANYID as string,",
+				"          DEPTYPEID as short,",
+				"          PATH as string,",
+				"          PARENTPATH as string",
+				"     ),",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}

@@ -1,0 +1,25 @@
+{
+	"name": "FMCG_SQLServer_MainDB",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MCS_FMCG_DWH_MainDB",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cw_table": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": {
+				"value": "@dataset().cw_table",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

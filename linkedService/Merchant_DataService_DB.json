@@ -1,0 +1,13 @@
+{
+	"name": "Merchant_DataService_DB",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "Merchant Data Service Database",
+		"annotations": [],
+		"type": "AzureMySql",
+		"typeProperties": {
+			"connectionString": "server=mcsholdingdata.mysql.database.azure.com;port=3306;database=test_merchant;uid=adfuser;sslmode=3;usesystemtruststore=0",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDVDMTQ1NDlFLTMzQUItNERGRS1COEIwLUI2NDg0Qzc1QjAxNF9iMWU1YzI4Yi00OGVhLTRkNzItYWEwMS1iMDc5NjBhYmMzOWIiDQp9"
+		}
+	}
+}

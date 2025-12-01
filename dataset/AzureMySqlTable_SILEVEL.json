@@ -1,0 +1,80 @@
+{
+	"name": "AzureMySqlTable_SILEVEL",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Azure_DWH_HR_link",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cwtablename": {
+				"type": "String",
+				"defaultValue": "dim_level"
+			}
+		},
+		"annotations": [],
+		"type": "AzureMySqlTable",
+		"schema": [
+			{
+				"name": "level_key",
+				"type": "int",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "level_id",
+				"type": "int",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "code",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "name",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "source_system_code",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "source_created_date",
+				"type": "datetime",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "source_updated_date",
+				"type": "datetime",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "dw_created_date",
+				"type": "datetime",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "dw_updated_date",
+				"type": "datetime",
+				"precision": 0,
+				"scale": 0
+			}
+		],
+		"typeProperties": {
+			"tableName": {
+				"value": "@dataset().cwtablename",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

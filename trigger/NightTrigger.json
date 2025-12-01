@@ -1,0 +1,28 @@
+{
+	"name": "NightTrigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "pl_evs_allemployee_UpsertTrigger",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"windowStart": "utcNow()",
+					"windowEnd": "addMinutes(utcNow(), 35)"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 24,
+				"startTime": "2025-11-27T01:40:00",
+				"timeZone": "Ulaanbaatar Standard Time"
+			}
+		}
+	}
+}

@@ -1,0 +1,54 @@
+{
+	"name": "dwh_pl_position",
+	"properties": {
+		"activities": [
+			{
+				"name": "dwh_df_position",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dwh_df_position",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"source1": {
+								"tableName": "TBLPOSITION",
+								"schema": "HRMS_PROD"
+							},
+							"source2": {
+								"tableName": "dim_company",
+								"schema": "dwh_hr"
+							},
+							"sink1": {
+								"tableName": "dim_position",
+								"schema": "dwh_hr"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine",
+					"continuationSettings": {
+						"customizedCheckpointKey": "911d8120-6961-490d-9ec0-29f116b1cc9b"
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "HR Pipelines/DW"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-11-27T09:26:10Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

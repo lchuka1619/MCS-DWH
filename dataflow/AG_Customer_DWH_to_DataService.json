@@ -1,0 +1,213 @@
+{
+	"name": "AG_Customer_DWH_to_DataService",
+	"properties": {
+		"folder": {
+			"name": "AG"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DWH_Mysql",
+						"type": "DatasetReference"
+					},
+					"name": "agDwhCustomerTable"
+				},
+				{
+					"dataset": {
+						"referenceName": "DataService_TestMerchant",
+						"type": "DatasetReference"
+					},
+					"name": "addressFromDataServiceTable"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DataService_TestMerchant",
+						"type": "DatasetReference"
+					},
+					"name": "saveToDataServiceDB"
+				}
+			],
+			"transformations": [
+				{
+					"name": "selectRequiredFields",
+					"description": "Data Service-iin customer_ag_info table-d hadgalj boloh medeelluudiig gargan avah process"
+				},
+				{
+					"name": "locationInfoProcessing"
+				},
+				{
+					"name": "separateAddressByLevel",
+					"description": "loc_name-g aimag_hot, duureg_sum, bag_khoroo gesen hesguuded huvaana"
+				},
+				{
+					"name": "makeAddressList",
+					"description": "aimag_hot, duureg_sum, bag_khoroo tus buriinh ni huvid list uusgene, uuniig ashiglan customer datanaas haygiin medeelel gargan avna"
+				},
+				{
+					"name": "customerWithLocationList"
+				},
+				{
+					"name": "locationCapturing",
+					"description": "aimag_hot, duureg_sum, bag_khoroo-nii medeelliig dataservice-iin DB deerh location table-tai matchlaad taarch bgaag ni ylgaj avna"
+				},
+				{
+					"name": "selectFieldForDB"
+				},
+				{
+					"name": "additionalFixOnLocation",
+					"description": "capitalize\nUlaanbaatriinh bish bol bag_khoroo-nii medeelliig hasah"
+				},
+				{
+					"name": "addressFixDistrictCityAbbr1",
+					"description": "УБ СХД => Улаанбаатар, Сонгинохайрхан дүүрэг geh meteer haygiig tovchilj bichsen bgaag zasah"
+				},
+				{
+					"name": "addressFixDistrictAbbr1",
+					"description": "СХД => Улаанбаатар, Сонгинохайрхан дүүрэг geh meteer haygiig tovchilj bichsen bgaag zasah"
+				},
+				{
+					"name": "AlterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id as integer,",
+				"          customer_ag_id as integer,",
+				"          customer_name as string,",
+				"          full_address as string,",
+				"          golden_flag as integer,",
+				"          customer_register as string,",
+				"          register_type as integer,",
+				"          phone_number as string,",
+				"          customer_created_date as timestamp,",
+				"          created_at as timestamp,",
+				"          updated_at as timestamp,",
+				"          is_reliable_register as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> agDwhCustomerTable",
+				"source(output(",
+				"          id as integer,",
+				"          loc_name as string,",
+				"          full_address as string,",
+				"          lvl as integer,",
+				"          eb_id as string,",
+				"          parent_id as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> addressFromDataServiceTable",
+				"agDwhCustomerTable select(mapColumn(",
+				"          customer_ag_id,",
+				"          customer_name,",
+				"          full_address,",
+				"          customer_register,",
+				"          register_type,",
+				"          phone_number,",
+				"          customer_created_date",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectRequiredFields",
+				"addressFixDistrictAbbr1 derive(aimag_hot = iif(isNull(at(split(fixed_address, ','), 3)), toString(null()), at(split(fixed_address, ','), 1)),",
+				"          duureg_sum = iif(isNull(at(split(fixed_address, ','), 3)), toString(null()), at(split(fixed_address, ','), 2)),",
+				"          bag_khoroo = iif(isNull(at(split(fixed_address, ','), 3)), toString(null()), at(split(fixed_address, ','), 3)),",
+				"          join_col = 1) ~> locationInfoProcessing",
+				"addressFromDataServiceTable derive(aimag_hot_list = iif(lvl == 1, lower(loc_name), toString(null())),",
+				"          duureg_sum_list = iif(lvl == 2, lower(loc_name), toString(null())),",
+				"          bag_khoroo_list = iif(lvl == 3, lower(loc_name), toString(null())),",
+				"          join_col = 1) ~> separateAddressByLevel",
+				"separateAddressByLevel aggregate(aimag_hot_list = collectUnique(aimag_hot_list),",
+				"          duureg_sum_list = collectUnique(duureg_sum_list),",
+				"          bag_khoroo_list = collectUnique(bag_khoroo_list),",
+				"          join_col = max(join_col)) ~> makeAddressList",
+				"locationInfoProcessing, makeAddressList join(locationInfoProcessing@join_col == makeAddressList@join_col,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> customerWithLocationList",
+				"customerWithLocationList derive(aimag_hot = toString(at(intersect(split(lower(aimag_hot), ' '), aimag_hot_list), 1)),",
+				"          duureg_sum = toString(at(intersect(split(lower(duureg_sum), ' '), duureg_sum_list), 1)),",
+				"          bag_khoroo = iif(\r",
+				"    instr(bag_khoroo, '-р хороо ') != 0,\r",
+				"    toInteger(at(split(bag_khoroo, '-р хороо '), 1)), \r",
+				"    iif(\r",
+				"        instr(bag_khoroo, '-р хороо,') != 0,\r",
+				"        toInteger(at(split(bag_khoroo, '-р хороо,'), 1)),\r",
+				"        iif(\r",
+				"            instr(bag_khoroo, 'хороо ') != 0,\r",
+				"            toInteger(at(split(bag_khoroo, 'хороо '), 1)),\r",
+				"            toInteger(null())\r",
+				"        )\r",
+				"    )\r",
+				")) ~> locationCapturing",
+				"locationCapturing select(mapColumn(",
+				"          customer_ag_id,",
+				"          customer_name,",
+				"          full_address,",
+				"          customer_register,",
+				"          register_type,",
+				"          phone_number,",
+				"          customer_created_date,",
+				"          aimag_hot,",
+				"          duureg_sum,",
+				"          bag_khoroo",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectFieldForDB",
+				"selectFieldForDB derive(aimag_hot = replace(initCap(replace(aimag_hot, '-', ' ')), ' ', '-'),",
+				"          duureg_sum = replace(initCap(replace(duureg_sum, '-', ' ')), ' ', '-'),",
+				"          bag_khoroo = iif(aimag_hot =='улаанбаатар', bag_khoroo, toInteger(null()))) ~> additionalFixOnLocation",
+				"selectRequiredFields derive(fixed_address = replace(\r",
+				"    replace(\r",
+				"        replace(\r",
+				"            replace(\r",
+				"                replace(\r",
+				"                    replace(\r",
+				"                        replace(\r",
+				"                            replace(\r",
+				"                                replace(\r",
+				"                                    lower(full_address), 'УБ НД', 'Улаанбаатар, Налайх дүүрэг,'\r",
+				"                                ), 'УБ БНД', 'Улаанбаатар, Багануур дүүрэг,'\r",
+				"                            ), 'УБ БХД', 'Улаанбаатар, Багахангай дүүрэг,'\r",
+				"                        ), 'УБ ЧД', 'Улаанбаатар, Чингэлтэй дүүрэг,'\r",
+				"                    ), 'УБ СБД', 'Улаанбаатар, Сүхбаатар дүүрэг,'\r",
+				"                ), 'УБ СХД', 'Улаанбаатар, Сонгинохайрхан дүүрэг,'\r",
+				"            ), 'УБ ХУД', 'Улаанбаатар, Хан-Уул дүүрэг,'\r",
+				"        ), 'УБ БЗД', 'Улаанбаатар, Баянзүрх дүүрэг,'\r",
+				"    ), 'УБ БГД', 'Улаанбаатар, Баянгол дүүрэг,'\r",
+				")) ~> addressFixDistrictCityAbbr1",
+				"addressFixDistrictCityAbbr1 derive(fixed_address = replace(\r",
+				"    replace(\r",
+				"        replace(\r",
+				"            replace(\r",
+				"                replace(\r",
+				"                    replace(\r",
+				"                        fixed_address, 'чд ', 'Улаанбаатар, Чингэлтэй дүүрэг,'\r",
+				"                    ), 'сбд', 'Улаанбаатар, Сүхбаатар дүүрэг,'\r",
+				"                ), 'схд', 'Улаанбаатар, Сонгинохайрхан дүүрэг,'\r",
+				"            ), 'худ ', 'Улаанбаатар, Хан-Уул дүүрэг,'\r",
+				"        ), 'бзд', 'Улаанбаатар, Баянзүрх дүүрэг,'\r",
+				"    ), 'бгд', 'Улаанбаатар, Баянгол дүүрэг,'\r",
+				")) ~> addressFixDistrictAbbr1",
+				"additionalFixOnLocation alterRow(upsertIf(true())) ~> AlterRow1",
+				"AlterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:true,",
+				"     keys:['customer_register','customer_ag_id'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> saveToDataServiceDB"
+			]
+		}
+	}
+}

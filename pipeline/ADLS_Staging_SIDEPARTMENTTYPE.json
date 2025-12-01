@@ -1,0 +1,49 @@
+{
+	"name": "ADLS_Staging_SIDEPARTMENTTYPE",
+	"properties": {
+		"activities": [
+			{
+				"name": "ADLS_Staging_TBLPOSITION",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "ADLS_Staging_TBLPOSITION",
+						"type": "DataFlowReference",
+						"parameters": {
+							"cwfilename": "\"TBLPOSITION\""
+						},
+						"datasetParameters": {
+							"source1": {
+								"cwfolder": "GreenErp",
+								"cwfilename": "TBLPOSITION.csv"
+							},
+							"sink1": {
+								"cwfolder": "TBLPOSITION"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"folder": {
+			"name": "HR Pipelines/DW_Mysql"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-11-27T09:26:10Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

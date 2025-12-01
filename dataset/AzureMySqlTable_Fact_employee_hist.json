@@ -1,0 +1,188 @@
+{
+	"name": "AzureMySqlTable_Fact_employee_hist",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Azure_DWH_HR_link",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cwtablename": {
+				"type": "String",
+				"defaultValue": "fact_employee_history"
+			}
+		},
+		"annotations": [],
+		"type": "AzureMySqlTable",
+		"schema": [
+			{
+				"name": "history_fact_key",
+				"type": "bigint",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "employee_key",
+				"type": "bigint",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "company_key",
+				"type": "int",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "department_key",
+				"type": "int",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "position_key",
+				"type": "int",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "grade_key",
+				"type": "int",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "level_key",
+				"type": "int",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "begin_date",
+				"type": "date",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "end_date",
+				"type": "date",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "source_system_code",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "source_history_id",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "source_employee_id",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "source_order_id",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "order_type",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "order_number",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "level_number",
+				"type": "int",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "base_wage",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "base_wage_currency",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "insurance_type_id",
+				"type": "int",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "labour_condition",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "is_current_position",
+				"type": "tinyint",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "is_active_employment",
+				"type": "tinyint",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "source_created_date",
+				"type": "datetime",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "source_updated_date",
+				"type": "datetime",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "dw_created_date",
+				"type": "datetime",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "dw_updated_date",
+				"type": "datetime",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "etl_batch_id",
+				"type": "bigint",
+				"precision": 0,
+				"scale": 0
+			}
+		],
+		"typeProperties": {
+			"tableName": {
+				"value": "@dataset().cwtablename",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

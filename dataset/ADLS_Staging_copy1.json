@@ -1,0 +1,51 @@
+{
+	"name": "ADLS_Staging_copy1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cwfolder": {
+				"type": "String",
+				"defaultValue": "TBLCOMPANY"
+			}
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@dataset().cwfolder",
+					"type": "Expression"
+				},
+				"fileSystem": "hr-staging"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "COMPANYID",
+				"type": "UTF8"
+			},
+			{
+				"name": "NAME",
+				"type": "UTF8"
+			},
+			{
+				"name": "CREATED",
+				"type": "UTF8"
+			},
+			{
+				"name": "UPDATED",
+				"type": "UTF8"
+			},
+			{
+				"name": "PARENTID",
+				"type": "UTF8"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

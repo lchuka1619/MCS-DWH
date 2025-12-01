@@ -1,0 +1,125 @@
+{
+	"name": "CC_Customer_Raw_to_Filtered",
+	"properties": {
+		"folder": {
+			"name": "CC"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ADLS_Raw_CSV",
+						"type": "DatasetReference"
+					},
+					"name": "ccRawFullCustomerCSV"
+				},
+				{
+					"dataset": {
+						"referenceName": "ADLS_Raw_CSV",
+						"type": "DatasetReference"
+					},
+					"name": "ccRawTradeShopGpsCSV"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ADLS_Filtered_CSV",
+						"type": "DatasetReference"
+					},
+					"name": "ccFilteredCSV"
+				}
+			],
+			"transformations": [
+				{
+					"name": "TradeShopIDLeftJoin"
+				},
+				{
+					"name": "ColumnFiltering",
+					"description": "Renaming and (removing) TradeShopIDLeftJoin to ColumnFiltering with columns"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          CUSID as integer,",
+				"          CusName as string,",
+				"          CusAddress as string,",
+				"          OwnerID as integer,",
+				"          OwnerName as string,",
+				"          GoldenFlag as string,",
+				"          StoreType as string,",
+				"          INN as string,",
+				"          Phone as string,",
+				"          BuyingPower as string,",
+				"          LocationSegment as integer,",
+				"          Channel as string,",
+				"          Image as string,",
+				"          SubChannel as string,",
+				"          SalesTeam as string,",
+				"          DeliveryArea as string,",
+				"          ChannelID as integer,",
+				"          District as string,",
+				"          Khoroo as short,",
+				"          CreateDate as string,",
+				"          UpdateDate as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     partitionBy('hash', 1)) ~> ccRawFullCustomerCSV",
+				"source(output(",
+				"          TradeshopID as integer,",
+				"          CreatedDate as string,",
+				"          UpdatedDate as string,",
+				"          UID as string,",
+				"          Longitude as double,",
+				"          Latitude as double",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     partitionBy('hash', 1)) ~> ccRawTradeShopGpsCSV",
+				"ccRawFullCustomerCSV, ccRawTradeShopGpsCSV join(CUSID == TradeshopID,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'off')~> TradeShopIDLeftJoin",
+				"TradeShopIDLeftJoin select(mapColumn(",
+				"          cusid_cc = CUSID,",
+				"          trade_shop_name = CusName,",
+				"          full_address = CusAddress,",
+				"          customer_cc_id = OwnerID,",
+				"          customer_name = OwnerName,",
+				"          golden_flag = GoldenFlag,",
+				"          store_type = StoreType,",
+				"          customer_register = INN,",
+				"          phone_number = Phone,",
+				"          buying_power = BuyingPower,",
+				"          location_segment = LocationSegment,",
+				"          channel = Channel,",
+				"          sub_channel = SubChannel,",
+				"          sales_team = SalesTeam,",
+				"          delivery_area = DeliveryArea,",
+				"          channel_id = ChannelID,",
+				"          district = District,",
+				"          khoroo = Khoroo,",
+				"          customer_created_date = CreateDate,",
+				"          longitude = Longitude,",
+				"          latitude = Latitude",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> ColumnFiltering",
+				"ColumnFiltering sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['cc_dwh_customer_full.csv'],",
+				"     umask: 0775,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> ccFilteredCSV"
+			]
+		}
+	}
+}

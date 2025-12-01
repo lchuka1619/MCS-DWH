@@ -1,0 +1,144 @@
+{
+	"name": "pl_evs_allemployee_UpsertTrigger",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy_xy6",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [
+					{
+						"name": "Source",
+						"value": "newQuery0"
+					},
+					{
+						"name": "Destination",
+						"value": "evs//evs"
+					}
+				],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"oracleReaderQuery": "select \n    FIRSTNAME as \"fn\",\n    LASTNAME as \"ln\",\n    REGNO as \"rn\",\n    COMPANYID as \"oid\",\n    PNAME as \"po\",\n    GNAME as \"gname\",\n    STATUS as \"status\",\n    EMPID as \"empid\",\n    STATUSDATE as \"status_date\",\n    ISFOREIGNER as \"is_foreigner\"\nfrom HRMS_PROD.V_BI_HREMPLOYEE \nwhere COMPANYID in  ('MCSCC', 'TD', 'TEL', 'AG', 'MG', 'ES', 'BMS', 'MCSES') \nand STATUS <> 'Бүртгэсэн'",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings",
+							"metadata": [
+								{
+									"name": "dfs",
+									"value": "sdf"
+								}
+							]
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"validateDataConsistency": false,
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Warning",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "linkedService_err",
+								"type": "LinkedServiceReference"
+							},
+							"path": "error"
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "SourceDataset_xy6",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "evs_csv",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "df_evs_allemployee_upsert",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "Copy_xy6",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "df_evs_allemployee_upsert",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"archiveToDataLake": {
+								"fileName": "evs_archive.csv",
+								"folderName": "archive"
+							},
+							"logSkippedMigrated": {
+								"fileName": "evs_skip.csv",
+								"folderName": "skipped"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"parameters": {
+			"windowStart": {
+				"type": "String"
+			},
+			"windowEnd": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "HR Pipelines/EVS"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-11-27T04:29:42Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

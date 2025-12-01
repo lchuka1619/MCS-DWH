@@ -1,0 +1,80 @@
+{
+	"name": "AzureMySqlTable_COMPANY",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Azure_DWH_HR_link",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cwtablename": {
+				"type": "String",
+				"defaultValue": "dim_company"
+			}
+		},
+		"annotations": [],
+		"type": "AzureMySqlTable",
+		"schema": [
+			{
+				"name": "company_key",
+				"type": "int",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "company_code",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "company_name",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "is_active",
+				"type": "bit",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "source_system_code",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "source_created_date",
+				"type": "datetime",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "source_updated_date",
+				"type": "datetime",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "dw_created_date",
+				"type": "datetime",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "dw_updated_date",
+				"type": "datetime",
+				"precision": 0,
+				"scale": 0
+			}
+		],
+		"typeProperties": {
+			"tableName": {
+				"value": "@dataset().cwtablename",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

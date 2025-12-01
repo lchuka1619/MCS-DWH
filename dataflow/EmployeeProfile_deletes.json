@@ -1,0 +1,86 @@
+{
+	"name": "EmployeeProfile_deletes",
+	"properties": {
+		"folder": {
+			"name": "HR/EVS"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Evs_employee",
+						"type": "DatasetReference"
+					},
+					"name": "existingSource0"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Evs_employee",
+						"type": "DatasetReference"
+					},
+					"name": "deleteOldSource0"
+				}
+			],
+			"transformations": [
+				{
+					"name": "selectSource0Keys"
+				},
+				{
+					"name": "markForDelete"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id as integer,",
+				"          rn as string,",
+				"          oid as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT id, rn, oid FROM employee_profile WHERE source = 0',",
+				"     format: 'query') ~> existingSource0",
+				"existingSource0 select(mapColumn(",
+				"          id,",
+				"          delete_rn = rn,",
+				"          delete_oid = oid",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectSource0Keys",
+				"selectSource0Keys alterRow(deleteIf(true())) ~> markForDelete",
+				"markForDelete sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id as integer,",
+				"          fn as string,",
+				"          rn as string,",
+				"          ln as string,",
+				"          oid as string,",
+				"          po as string,",
+				"          gname as string,",
+				"          empid as integer,",
+				"          im as string,",
+				"          source as string,",
+				"          created_at as timestamp,",
+				"          updated_at as timestamp,",
+				"          status_date as timestamp,",
+				"          status as integer,",
+				"          gname_number as integer,",
+				"          is_foreigner as integer",
+				"     ),",
+				"     deletable:true,",
+				"     insertable:false,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     keys:['id'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 0) ~> deleteOldSource0"
+			]
+		}
+	}
+}

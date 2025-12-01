@@ -1,0 +1,331 @@
+{
+	"name": "ADLS_Staging_Employee",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cwfolder": {
+				"type": "String",
+				"defaultValue": "TBLEMPLOYEE"
+			}
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@dataset().cwfolder",
+					"type": "Expression"
+				},
+				"fileSystem": "hr-staging"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "EMPID",
+				"type": "UTF8"
+			},
+			{
+				"name": "CODE",
+				"type": "UTF8"
+			},
+			{
+				"name": "FAMILYNAME",
+				"type": "UTF8"
+			},
+			{
+				"name": "LASTNAME",
+				"type": "UTF8"
+			},
+			{
+				"name": "FIRSTNAME",
+				"type": "UTF8"
+			},
+			{
+				"name": "GENDER",
+				"type": "UTF8"
+			},
+			{
+				"name": "BIRTHDATE",
+				"type": "UTF8"
+			},
+			{
+				"name": "BIRTHCOUNTRYID",
+				"type": "UTF8"
+			},
+			{
+				"name": "BIRTHDIVISIONID",
+				"type": "UTF8"
+			},
+			{
+				"name": "BIRTHDISTRICTID",
+				"type": "UTF8"
+			},
+			{
+				"name": "BIRTHPLACE",
+				"type": "UTF8"
+			},
+			{
+				"name": "COUNTRYID",
+				"type": "UTF8"
+			},
+			{
+				"name": "DIVISIONID",
+				"type": "UTF8"
+			},
+			{
+				"name": "DISTRICTID",
+				"type": "UTF8"
+			},
+			{
+				"name": "NATIONALITYID",
+				"type": "UTF8"
+			},
+			{
+				"name": "SOCIALORIGINID",
+				"type": "UTF8"
+			},
+			{
+				"name": "MARITALSTATUS",
+				"type": "UTF8"
+			},
+			{
+				"name": "BLOODGROUP",
+				"type": "UTF8"
+			},
+			{
+				"name": "REGNO",
+				"type": "UTF8"
+			},
+			{
+				"name": "PASSNO",
+				"type": "UTF8"
+			},
+			{
+				"name": "FORPASSNO",
+				"type": "UTF8"
+			},
+			{
+				"name": "EMDNO",
+				"type": "UTF8"
+			},
+			{
+				"name": "NDDNO",
+				"type": "UTF8"
+			},
+			{
+				"name": "ADDR1",
+				"type": "UTF8"
+			},
+			{
+				"name": "ADDR2",
+				"type": "UTF8"
+			},
+			{
+				"name": "HOMEPHONE",
+				"type": "UTF8"
+			},
+			{
+				"name": "MOBILEPHONE",
+				"type": "UTF8"
+			},
+			{
+				"name": "WORKPHONE",
+				"type": "UTF8"
+			},
+			{
+				"name": "WORKPHONEEXT",
+				"type": "UTF8"
+			},
+			{
+				"name": "FAX",
+				"type": "UTF8"
+			},
+			{
+				"name": "EMAIL",
+				"type": "UTF8"
+			},
+			{
+				"name": "POSTADDRESS",
+				"type": "UTF8"
+			},
+			{
+				"name": "CONTACTNAME",
+				"type": "UTF8"
+			},
+			{
+				"name": "CONTACTPHONE",
+				"type": "UTF8"
+			},
+			{
+				"name": "WITHPICTURE",
+				"type": "UTF8"
+			},
+			{
+				"name": "STATUS",
+				"type": "UTF8"
+			},
+			{
+				"name": "CREATED",
+				"type": "UTF8"
+			},
+			{
+				"name": "CREATEDBY",
+				"type": "UTF8"
+			},
+			{
+				"name": "UPDATED",
+				"type": "UTF8"
+			},
+			{
+				"name": "UPDATEDBY",
+				"type": "UTF8"
+			},
+			{
+				"name": "IPADDRESS",
+				"type": "UTF8"
+			},
+			{
+				"name": "MACADDRESS",
+				"type": "UTF8"
+			},
+			{
+				"name": "TSTAMP",
+				"type": "UTF8"
+			},
+			{
+				"name": "COMPANYID",
+				"type": "UTF8"
+			},
+			{
+				"name": "STATUSDATE",
+				"type": "UTF8"
+			},
+			{
+				"name": "LASTNAMELENGTH",
+				"type": "UTF8"
+			},
+			{
+				"name": "EMAIL2",
+				"type": "UTF8"
+			},
+			{
+				"name": "CONTACTNAME2",
+				"type": "UTF8"
+			},
+			{
+				"name": "CONTACTPHONE2",
+				"type": "UTF8"
+			},
+			{
+				"name": "ISBLACKLISTED",
+				"type": "UTF8"
+			},
+			{
+				"name": "BLACKLISTREASON",
+				"type": "UTF8"
+			},
+			{
+				"name": "BLACKLISTEDDATE",
+				"type": "UTF8"
+			},
+			{
+				"name": "ISFOREIGNER",
+				"type": "UTF8"
+			},
+			{
+				"name": "CONTACTID",
+				"type": "UTF8"
+			},
+			{
+				"name": "MILITARYSERVED",
+				"type": "UTF8"
+			},
+			{
+				"name": "TRAININGSPORT",
+				"type": "UTF8"
+			},
+			{
+				"name": "INTEREST",
+				"type": "UTF8"
+			},
+			{
+				"name": "APPID",
+				"type": "UTF8"
+			},
+			{
+				"name": "MILITARYNO",
+				"type": "UTF8"
+			},
+			{
+				"name": "RELATIVEID",
+				"type": "UTF8"
+			},
+			{
+				"name": "RELATIVEID2",
+				"type": "UTF8"
+			},
+			{
+				"name": "MILITARYCLOSETYPE",
+				"type": "UTF8"
+			},
+			{
+				"name": "MILITARYCOMMENT",
+				"type": "UTF8"
+			},
+			{
+				"name": "LINKEDIN",
+				"type": "UTF8"
+			},
+			{
+				"name": "FACEBOOK",
+				"type": "UTF8"
+			},
+			{
+				"name": "TWITTER",
+				"type": "UTF8"
+			},
+			{
+				"name": "ISSPYOATH",
+				"type": "UTF8"
+			},
+			{
+				"name": "SPYOATHDATE",
+				"type": "UTF8"
+			},
+			{
+				"name": "ISGOVERNMENTOATH",
+				"type": "UTF8"
+			},
+			{
+				"name": "GOVERNMENTOATHDATE",
+				"type": "UTF8"
+			},
+			{
+				"name": "ISMILITARYOATH",
+				"type": "UTF8"
+			},
+			{
+				"name": "MILITARYOATHDATE",
+				"type": "UTF8"
+			},
+			{
+				"name": "LINKID",
+				"type": "UTF8"
+			},
+			{
+				"name": "ISRESIDENT",
+				"type": "UTF8"
+			},
+			{
+				"name": "CIVILID",
+				"type": "UTF8"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,236 @@
+{
+	"name": "EmployeeProfile_From_GreenHR_copy1",
+	"properties": {
+		"folder": {
+			"name": "HR/EVS"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "evs_csv",
+						"type": "DatasetReference"
+					},
+					"name": "sourceEmployees"
+				},
+				{
+					"dataset": {
+						"referenceName": "Evs_employee",
+						"type": "DatasetReference"
+					},
+					"name": "existingAllSources"
+				},
+				{
+					"dataset": {
+						"referenceName": "Evs_employee",
+						"type": "DatasetReference"
+					},
+					"name": "existingSource0"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Evs_employee",
+						"type": "DatasetReference"
+					},
+					"name": "insertNewEmployees",
+					"rejectedDataLinkedService": {
+						"referenceName": "linkedService_err",
+						"type": "LinkedServiceReference"
+					}
+				},
+				{
+					"dataset": {
+						"referenceName": "ADLS_Raw_CSV",
+						"type": "DatasetReference"
+					},
+					"name": "archiveToDataLake"
+				},
+				{
+					"dataset": {
+						"referenceName": "Evs_employee",
+						"type": "DatasetReference"
+					},
+					"name": "deleteOldSource0"
+				}
+			],
+			"transformations": [
+				{
+					"name": "transformStatusAndSource"
+				},
+				{
+					"name": "removeDuplicatesInSource"
+				},
+				{
+					"name": "extractNumberFromGname"
+				},
+				{
+					"name": "joinWithAllExisting"
+				},
+				{
+					"name": "filterOnlyNewEmployees"
+				},
+				{
+					"name": "selectAllSourcesKeys"
+				},
+				{
+					"name": "selectSource0Keys"
+				},
+				{
+					"name": "markForInsert"
+				},
+				{
+					"name": "markForDelete"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          fn as string,",
+				"          ln as string,",
+				"          rn as string,",
+				"          oid as string,",
+				"          po as string,",
+				"          gname as string,",
+				"          status as string,",
+				"          empid as integer,",
+				"          status_date as timestamp,",
+				"          is_foreigner as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: false) ~> sourceEmployees",
+				"source(output(",
+				"          rn as string,",
+				"          oid as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT DISTINCT rn, oid FROM employee_profile',",
+				"     format: 'query') ~> existingAllSources",
+				"source(output(",
+				"          id as integer,",
+				"          rn as string,",
+				"          oid as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT id, rn, oid FROM employee_profile WHERE source = 0',",
+				"     format: 'query') ~> existingSource0",
+				"sourceEmployees derive(status = iif(status == 'Идэвхтэй', 1,",
+				"            iif(status == 'Ажлаас Гарсан', 2,",
+				"                iif(status == 'Шилжсэн', 2,",
+				"                    iif(status == 'Түр Эзгүй', 3, toInteger(null()))))),",
+				"          is_foreigner = iif(is_foreigner == true(), 1, 0),",
+				"          source = 0,",
+				"          rn = trim(toString(rn)),",
+				"          oid = trim(toString(oid))) ~> transformStatusAndSource",
+				"extractNumberFromGname aggregate(groupBy(rn,",
+				"          oid),",
+				"     fn = last(fn),",
+				"          ln = last(ln),",
+				"          po = last(po),",
+				"          gname = last(gname),",
+				"          status = last(status),",
+				"          empid = last(empid),",
+				"          status_date = max(status_date),",
+				"          is_foreigner = last(is_foreigner),",
+				"          source = last(source),",
+				"          gname_number = last(gname_number)) ~> removeDuplicatesInSource",
+				"transformStatusAndSource derive(gname_number = toInteger(regexReplace(gname, '[^0-9]', ''))) ~> extractNumberFromGname",
+				"removeDuplicatesInSource, selectAllSourcesKeys join(rn == existing_rn",
+				"     && oid == existing_oid,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinWithAllExisting",
+				"joinWithAllExisting filter(isNull(existing_rn)) ~> filterOnlyNewEmployees",
+				"existingAllSources select(mapColumn(",
+				"          existing_rn = rn,",
+				"          existing_oid = oid",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectAllSourcesKeys",
+				"existingSource0 select(mapColumn(",
+				"          delete_id = id,",
+				"          delete_rn = rn,",
+				"          delete_oid = oid",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectSource0Keys",
+				"filterOnlyNewEmployees alterRow(insertIf(true())) ~> markForInsert",
+				"selectSource0Keys alterRow(deleteIf(true())) ~> markForDelete",
+				"markForInsert sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id as integer,",
+				"          fn as string,",
+				"          rn as string,",
+				"          ln as string,",
+				"          oid as string,",
+				"          po as string,",
+				"          gname as string,",
+				"          empid as integer,",
+				"          im as string,",
+				"          source as string,",
+				"          created_at as timestamp,",
+				"          updated_at as timestamp,",
+				"          status_date as timestamp,",
+				"          status as integer,",
+				"          gname_number as integer,",
+				"          is_foreigner as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 2) ~> insertNewEmployees",
+				"joinWithAllExisting sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['employee_monthly_load.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> archiveToDataLake",
+				"markForDelete sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id as integer,",
+				"          fn as string,",
+				"          rn as string,",
+				"          ln as string,",
+				"          oid as string,",
+				"          po as string,",
+				"          gname as string,",
+				"          empid as integer,",
+				"          im as string,",
+				"          source as string,",
+				"          created_at as timestamp,",
+				"          updated_at as timestamp,",
+				"          status_date as timestamp,",
+				"          status as integer,",
+				"          gname_number as integer,",
+				"          is_foreigner as integer",
+				"     ),",
+				"     deletable:true,",
+				"     insertable:false,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     keys:['delete_id'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 1) ~> deleteOldSource0"
+			]
+		}
+	}
+}

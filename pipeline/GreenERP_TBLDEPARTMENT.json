@@ -1,0 +1,84 @@
+{
+	"name": "GreenERP_TBLDEPARTMENT",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy_qd9",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings",
+							"copyBehavior": "FlattenHierarchy"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "HR_GreenERP_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": "TBLDEPARTMENT"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ADLS_Raw_GreenErp_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"cw_fileName": "TBLDEPARTMENT.csv",
+							"cw_folderPath": "@pipeline().parameters.main_directory"
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"windowStart": {
+				"type": "String"
+			},
+			"windowEnd": {
+				"type": "String"
+			},
+			"main_directory": {
+				"type": "String",
+				"defaultValue": "GreenErp"
+			}
+		},
+		"folder": {
+			"name": "HR Pipelines/DW_Mysql"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-11-27T09:26:10Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

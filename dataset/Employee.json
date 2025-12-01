@@ -1,0 +1,342 @@
+{
+	"name": "Employee",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cwfolder": {
+				"type": "string",
+				"defaultValue": "GreenErp"
+			},
+			"cwfilename": {
+				"type": "string",
+				"defaultValue": "HREMPLOYEE.csv"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().cwfilename",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().cwfolder",
+					"type": "Expression"
+				},
+				"fileSystem": "hr-raw"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "EMPID",
+				"type": "String"
+			},
+			{
+				"name": "CODE",
+				"type": "String"
+			},
+			{
+				"name": "FAMILYNAME",
+				"type": "String"
+			},
+			{
+				"name": "LASTNAME",
+				"type": "String"
+			},
+			{
+				"name": "FIRSTNAME",
+				"type": "String"
+			},
+			{
+				"name": "GENDER",
+				"type": "String"
+			},
+			{
+				"name": "BIRTHDATE",
+				"type": "String"
+			},
+			{
+				"name": "BIRTHCOUNTRYID",
+				"type": "String"
+			},
+			{
+				"name": "BIRTHDIVISIONID",
+				"type": "String"
+			},
+			{
+				"name": "BIRTHDISTRICTID",
+				"type": "String"
+			},
+			{
+				"name": "BIRTHPLACE",
+				"type": "String"
+			},
+			{
+				"name": "COUNTRYID",
+				"type": "String"
+			},
+			{
+				"name": "DIVISIONID",
+				"type": "String"
+			},
+			{
+				"name": "DISTRICTID",
+				"type": "String"
+			},
+			{
+				"name": "NATIONALITYID",
+				"type": "String"
+			},
+			{
+				"name": "SOCIALORIGINID",
+				"type": "String"
+			},
+			{
+				"name": "MARITALSTATUS",
+				"type": "String"
+			},
+			{
+				"name": "BLOODGROUP",
+				"type": "String"
+			},
+			{
+				"name": "REGNO",
+				"type": "String"
+			},
+			{
+				"name": "PASSNO",
+				"type": "String"
+			},
+			{
+				"name": "FORPASSNO",
+				"type": "String"
+			},
+			{
+				"name": "EMDNO",
+				"type": "String"
+			},
+			{
+				"name": "NDDNO",
+				"type": "String"
+			},
+			{
+				"name": "ADDR1",
+				"type": "String"
+			},
+			{
+				"name": "ADDR2",
+				"type": "String"
+			},
+			{
+				"name": "HOMEPHONE",
+				"type": "String"
+			},
+			{
+				"name": "MOBILEPHONE",
+				"type": "String"
+			},
+			{
+				"name": "WORKPHONE",
+				"type": "String"
+			},
+			{
+				"name": "WORKPHONEEXT",
+				"type": "String"
+			},
+			{
+				"name": "FAX",
+				"type": "String"
+			},
+			{
+				"name": "EMAIL",
+				"type": "String"
+			},
+			{
+				"name": "POSTADDRESS",
+				"type": "String"
+			},
+			{
+				"name": "CONTACTNAME",
+				"type": "String"
+			},
+			{
+				"name": "CONTACTPHONE",
+				"type": "String"
+			},
+			{
+				"name": "WITHPICTURE",
+				"type": "String"
+			},
+			{
+				"name": "STATUS",
+				"type": "String"
+			},
+			{
+				"name": "CREATED",
+				"type": "String"
+			},
+			{
+				"name": "CREATEDBY",
+				"type": "String"
+			},
+			{
+				"name": "UPDATED",
+				"type": "String"
+			},
+			{
+				"name": "UPDATEDBY",
+				"type": "String"
+			},
+			{
+				"name": "IPADDRESS",
+				"type": "String"
+			},
+			{
+				"name": "MACADDRESS",
+				"type": "String"
+			},
+			{
+				"name": "TSTAMP",
+				"type": "String"
+			},
+			{
+				"name": "COMPANYID",
+				"type": "String"
+			},
+			{
+				"name": "STATUSDATE",
+				"type": "String"
+			},
+			{
+				"name": "LASTNAMELENGTH",
+				"type": "String"
+			},
+			{
+				"name": "EMAIL2",
+				"type": "String"
+			},
+			{
+				"name": "CONTACTNAME2",
+				"type": "String"
+			},
+			{
+				"name": "CONTACTPHONE2",
+				"type": "String"
+			},
+			{
+				"name": "ISBLACKLISTED",
+				"type": "String"
+			},
+			{
+				"name": "BLACKLISTREASON",
+				"type": "String"
+			},
+			{
+				"name": "BLACKLISTEDDATE",
+				"type": "String"
+			},
+			{
+				"name": "ISFOREIGNER",
+				"type": "String"
+			},
+			{
+				"name": "CONTACTID",
+				"type": "String"
+			},
+			{
+				"name": "MILITARYSERVED",
+				"type": "String"
+			},
+			{
+				"name": "TRAININGSPORT",
+				"type": "String"
+			},
+			{
+				"name": "INTEREST",
+				"type": "String"
+			},
+			{
+				"name": "APPID",
+				"type": "String"
+			},
+			{
+				"name": "MILITARYNO",
+				"type": "String"
+			},
+			{
+				"name": "RELATIVEID",
+				"type": "String"
+			},
+			{
+				"name": "RELATIVEID2",
+				"type": "String"
+			},
+			{
+				"name": "MILITARYCLOSETYPE",
+				"type": "String"
+			},
+			{
+				"name": "MILITARYCOMMENT",
+				"type": "String"
+			},
+			{
+				"name": "LINKEDIN",
+				"type": "String"
+			},
+			{
+				"name": "FACEBOOK",
+				"type": "String"
+			},
+			{
+				"name": "TWITTER",
+				"type": "String"
+			},
+			{
+				"name": "ISSPYOATH",
+				"type": "String"
+			},
+			{
+				"name": "SPYOATHDATE",
+				"type": "String"
+			},
+			{
+				"name": "ISGOVERNMENTOATH",
+				"type": "String"
+			},
+			{
+				"name": "GOVERNMENTOATHDATE",
+				"type": "String"
+			},
+			{
+				"name": "ISMILITARYOATH",
+				"type": "String"
+			},
+			{
+				"name": "MILITARYOATHDATE",
+				"type": "String"
+			},
+			{
+				"name": "LINKID",
+				"type": "String"
+			},
+			{
+				"name": "ISRESIDENT",
+				"type": "String"
+			},
+			{
+				"name": "CIVILID",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

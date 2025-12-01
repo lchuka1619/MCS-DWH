@@ -1,0 +1,11 @@
+{
+	"name": "ADLS_FMCS_RAW",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://mcsdatalake.dfs.core.windows.net/"
+		}
+	}
+}

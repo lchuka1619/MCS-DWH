@@ -1,0 +1,24 @@
+{
+	"name": "Trigger_xii",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "CopyPipeline_xii",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 24,
+				"startTime": "2025-11-21T14:57:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}

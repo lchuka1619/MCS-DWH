@@ -1,0 +1,130 @@
+{
+	"name": "ADLS_Staging_copy1",
+	"properties": {
+		"folder": {
+			"name": "HR"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "TBLEMPEMPLHIST_csv",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ADLS_Staging",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "selectRequiredFields"
+				},
+				{
+					"name": "filter1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          HISTORYID as integer,",
+				"          EMPID as short,",
+				"          BEGINDATE as string,",
+				"          ENDDATE as string,",
+				"          ORDERID as short,",
+				"          ORDERTYPE as string,",
+				"          COMPANYID as string,",
+				"          DEPID as short,",
+				"          POSITIONID as short,",
+				"          GRADEID as short,",
+				"          LEVELID as short,",
+				"          BASEWAGE as integer,",
+				"          BASEWAGECURRCODE as string,",
+				"          TSTAMP as string,",
+				"          CREATED as string,",
+				"          CREATEDBY as string,",
+				"          UPDATED as string,",
+				"          UPDATEDBY as string,",
+				"          IPADDRESS as string,",
+				"          MACADDRESS as string,",
+				"          ORDERNO as string,",
+				"          ISMANUALHIST as boolean,",
+				"          ISNOTLOCALHIST as boolean,",
+				"          LEGALENTITYID as short,",
+				"          OLDDEPNAME as string,",
+				"          JOBID as short,",
+				"          NOTE as string,",
+				"          INSURETYPEID as short,",
+				"          LABOURCONDITION as boolean,",
+				"          ISMULT as boolean,",
+				"          MULTYEAR as boolean,",
+				"          HISTREASON as short,",
+				"          HISTREASONNAMES as string,",
+				"          TOTALWAGE as integer,",
+				"          EVOLVEWAGE as boolean,",
+				"          CALCPERCENT as short,",
+				"          GRADETYPEID as string,",
+				"          LEVELNO as string,",
+				"          FTEMAINID as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"filter1 select(skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectRequiredFields",
+				"source1 filter(COMPANYID!=\"MCSH\") ~> filter1",
+				"selectRequiredFields sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          DEPID as short,",
+				"          DEPCODE as string,",
+				"          NAME as string,",
+				"          ISACTIVE as boolean,",
+				"          PARENTID as string,",
+				"          CREATED as string,",
+				"          UPDATED as string,",
+				"          COMPANYID as string,",
+				"          DEPTYPEID as short,",
+				"          PATH as string,",
+				"          PARENTPATH as string",
+				"     ),",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          HISTORYID,",
+				"          EMPID,",
+				"          BEGINDATE,",
+				"          ENDDATE,",
+				"          ORDERID,",
+				"          ORDERTYPE,",
+				"          COMPANYID,",
+				"          DEPID,",
+				"          POSITIONID,",
+				"          GRADEID,",
+				"          LEVELID,",
+				"          BASEWAGE,",
+				"          BASEWAGECURRCODE,",
+				"          CREATED,",
+				"          UPDATED,",
+				"          ORDERNO,",
+				"          OLDDEPNAME,",
+				"          JOBID,",
+				"          INSURETYPEID,",
+				"          LABOURCONDITION",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

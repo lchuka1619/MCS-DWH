@@ -1,0 +1,373 @@
+{
+	"name": "AG_Customer_Full_Flow",
+	"properties": {
+		"activities": [
+			{
+				"name": "AG_Customer_Raw_to_Filtered",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "TradeshopGPS_DBToCSV",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "Customer_DBToCSV",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "AG_Customer_Raw_to_Filtered",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"agRawFullCustomerCSV": {
+								"csv_fileName": "ag_dwh_full_customer.csv",
+								"csv_directory": "ag_dwh_sink"
+							},
+							"agRawTradeShopGpsCSV": {
+								"csv_fileName": "ag_dwh_full_trade_shop_gps.csv",
+								"csv_directory": "ag_dwh_sink"
+							},
+							"agFilteredCSV": {
+								"csv_directory": "ag_dwh_filtered",
+								"csv_fileName": "ag_dwh_customer_full.csv"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "None",
+					"cacheSinks": {
+						"firstRowOnly": true
+					}
+				}
+			},
+			{
+				"name": "AG_Customer_Filtered_to_DWH",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "AG_Customer_Raw_to_Filtered",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "AG_Customer_Filtered_to_DWH",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"agCustomerFiltered": {
+								"csv_directory": "ag_dwh_filtered",
+								"csv_fileName": "ag_dwh_customer_full.csv"
+							},
+							"agCustomerDWH": {
+								"cw_table": "ag_dwh_customer"
+							},
+							"agTradeShopDWH": {
+								"cw_table": "ag_dwh_trade_shop"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "None",
+					"cacheSinks": {
+						"firstRowOnly": true
+					}
+				}
+			},
+			{
+				"name": "Customer_DBToCSV",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": {
+							"value": "select\n    CusID,\n    REPLACE(REPLACE(CusName, CHAR(10), ''), CHAR(13), '') AS CusName,\n    REPLACE(REPLACE(REPLACE(cusAddress, CHAR(10), ''), CHAR(13), ''), '\"', '') AS cusAddress,\n    ISISChannelID,\n    OwnerID,\n    REPLACE(REPLACE(OwnerName, CHAR(10), ''), CHAR(13), '') AS OwnerName,\n    REPLACE(REPLACE(INN, CHAR(10), ''), CHAR(13), '') AS INN,\n    TradeShopID,\n    REPLACE(REPLACE(StoreTypeName, CHAR(10), ''), CHAR(13), '') AS StoreTypeName,\n    Phone,\n    CreateDate,\n    UpdateDate\nfrom [dbo].[@{pipeline().parameters.src_customer_table}]",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"validateDataConsistency": true,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "FMCG_SQLServer_QVReports",
+						"type": "DatasetReference",
+						"parameters": {
+							"cw_table": {
+								"value": "@pipeline().parameters.src_customer_table",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ADLS_Raw_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"csv_fileName": {
+								"value": "@pipeline().parameters.dest_customer_file",
+								"type": "Expression"
+							},
+							"csv_directory": {
+								"value": "@pipeline().parameters.dest_folder",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "TradeshopGPS_DBToCSV",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"validateDataConsistency": true,
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Warning",
+							"enableReliableLogging": true
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "ADLS_FMCS_RAW",
+								"type": "LinkedServiceReference"
+							},
+							"path": "fmcg-raw/logs"
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "FMCG_SQLServer_QVReports",
+						"type": "DatasetReference",
+						"parameters": {
+							"cw_table": {
+								"value": "@pipeline().parameters.src_tradeshop_gps_table",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ADLS_Raw_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"csv_fileName": {
+								"value": "@pipeline().parameters.dest_gps_file",
+								"type": "Expression"
+							},
+							"csv_directory": {
+								"value": "@pipeline().parameters.dest_folder",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "AG_Customer_DWH_to_DataService",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "AG_Customer_Filtered_to_DWH",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "AG_Customer_DWH_to_DataService",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"agDwhCustomerTable": {
+								"cw_table": "ag_dwh_customer"
+							},
+							"addressFromDataServiceTable": {
+								"cw_table": "location"
+							},
+							"saveToDataServiceDB": {
+								"cw_table": "customer_ag_info"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "AG_TradeShop_DWH_to_DataService",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "AG_Customer_Filtered_to_DWH",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "AG_TradeShop_DWH_to_DataService",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"agDwhTradeShopTable": {
+								"cw_table": "ag_dwh_trade_shop"
+							},
+							"addressFromDataServiceTable": {
+								"cw_table": "location"
+							},
+							"saveToDataServiceDB": {
+								"cw_table": "trade_shop_ag_info"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"parameters": {
+			"src_customer_table": {
+				"type": "string",
+				"defaultValue": "BigOneFullCustomers"
+			},
+			"src_tradeshop_gps_table": {
+				"type": "string",
+				"defaultValue": "TradeshopGPS_AG"
+			},
+			"dest_folder": {
+				"type": "string",
+				"defaultValue": "ag_dwh_sink"
+			},
+			"dest_customer_file": {
+				"type": "string",
+				"defaultValue": "ag_dwh_full_customer.csv"
+			},
+			"dest_gps_file": {
+				"type": "string",
+				"defaultValue": "ag_dwh_full_trade_shop_gps.csv"
+			}
+		},
+		"folder": {
+			"name": "AG Pipelines/Customer"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-11-11T04:37:21Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

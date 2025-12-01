@@ -1,0 +1,129 @@
+{
+	"name": "dwh_df_department",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Dataset_Source",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "Dataset_Source",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Dataset_Sink",
+						"type": "DatasetReference"
+					},
+					"name": "sink1",
+					"rejectedDataLinkedService": {
+						"referenceName": "linkedService_err",
+						"type": "LinkedServiceReference"
+					}
+				}
+			],
+			"transformations": [
+				{
+					"name": "join1"
+				},
+				{
+					"name": "sourcesystemcode"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          DEPID as string,",
+				"          DEPCODE as string,",
+				"          NAME as string,",
+				"          ISACTIVE as string,",
+				"          PARENTID as string,",
+				"          CREATED as string,",
+				"          CREATEDBY as string,",
+				"          UPDATED as string,",
+				"          UPDATEDBY as string,",
+				"          IPADDRESS as string,",
+				"          MACADDRESS as string,",
+				"          TSTAMP as timestamp,",
+				"          COMPANYID as string,",
+				"          DEPTYPEID as long,",
+				"          PATH as string,",
+				"          PARENTPATH as string,",
+				"          REPGROUPID as string,",
+				"          INTDEPID as long,",
+				"          INTPARENTID as long,",
+				"          DEPTYPE as string,",
+				"          LDAPPATH as string,",
+				"          ISPROVINCE as string,",
+				"          ESTABLISHEDDATE as string,",
+				"          SHOWONORGCHART as string,",
+				"          FAPURPOSEID as long",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"source(output(",
+				"          company_key as integer,",
+				"          company_code as string,",
+				"          company_name as string,",
+				"          is_active as boolean,",
+				"          source_system_code as string,",
+				"          source_created_date as timestamp,",
+				"          source_updated_date as timestamp,",
+				"          dw_created_date as timestamp,",
+				"          dw_updated_date as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source2",
+				"source1, source2 join(COMPANYID == company_code,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 derive(COMPANYID = iif(isNull(COMPANYID), 'MCK', COMPANYID),",
+				"          source_system_code = 0,",
+				"          ISACTIVE_INT = iif(ISACTIVE=='Y', 1, 0),",
+				"          company_key = company_key,",
+				"          source_department_id = DEPID,",
+				"          department_code = DEPCODE,",
+				"          department_name = NAME) ~> sourcesystemcode",
+				"sourcesystemcode derive(is_active = toInteger(ISACTIVE_INT),",
+				"          effective_start_date = iif(isNull(CREATED), currentUTC(), toTimestamp(CREATED, 'yyyy.MM.dd HH:mm:ss')),",
+				"          effective_end_date = iif(isNull(UPDATED), toTimestamp('9999-12-31T00:00:00Z'), toTimestamp(UPDATED, 'yyyy.MM.dd HH:mm:ss')),",
+				"          is_current_record = toInteger(1),",
+				"          dw_created_date = currentTimestamp(),",
+				"          dw_updated_date = currentTimestamp()) ~> select1",
+				"select1 alterRow(upsertIf(!isNull(source_department_id))) ~> alterRow1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:true,",
+				"     keys:['source_department_id'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+			]
+		}
+	}
+}

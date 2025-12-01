@@ -1,0 +1,12 @@
+{
+	"name": "Azure_DWH_Hr",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureMySql",
+		"typeProperties": {
+			"connectionString": "server=mcsholdingdwh.mysql.database.azure.com;port=3306;database=hr;uid=mcsholdingdwh;sslmode=1;usesystemtruststore=0",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDVDMTQ1NDlFLTMzQUItNERGRS1COEIwLUI2NDg0Qzc1QjAxNF8zN2Q0MzE4NS03MmRhLTRkZWMtYTdmOS00M2JmNDkxZWQ5ZTgiDQp9"
+		}
+	}
+}

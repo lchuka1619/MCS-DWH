@@ -1,0 +1,150 @@
+{
+	"name": "AG_MainDB_to_Raw",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy RouteDays src to raw",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "FMCG_SQLServer_MainDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"cw_table": "AG_RouteDays"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ADLS_Raw_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"csv_fileName": "ag_dwh_route_days.csv",
+							"csv_directory": {
+								"value": "@pipeline().parameters.main_directory",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy SalesReps src to raw",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy RouteDays src to raw",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "FMCG_SQLServer_MainDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"cw_table": "AG_Salereps"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ADLS_Raw_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"csv_fileName": "ag_dwh_sales_reps.csv",
+							"csv_directory": {
+								"value": "@pipeline().parameters.main_directory",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"main_directory": {
+				"type": "string",
+				"defaultValue": "ag_dwh_sink"
+			}
+		},
+		"folder": {
+			"name": "AG Pipelines"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-11-11T04:37:21Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

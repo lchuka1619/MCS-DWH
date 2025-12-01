@@ -1,0 +1,206 @@
+{
+	"name": "df_evs_allemployee_upsert",
+	"properties": {
+		"folder": {
+			"name": "HR/EVS"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "evs_csv",
+						"type": "DatasetReference"
+					},
+					"name": "sourceEmployees"
+				},
+				{
+					"dataset": {
+						"referenceName": "Evs_employee",
+						"type": "DatasetReference"
+					},
+					"name": "existingAllSources"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Evs_employee",
+						"type": "DatasetReference"
+					},
+					"name": "upsertEmployees"
+				},
+				{
+					"dataset": {
+						"referenceName": "ADLS_Raw_Evs_csv",
+						"type": "DatasetReference"
+					},
+					"name": "archiveToDataLake"
+				},
+				{
+					"dataset": {
+						"referenceName": "ADLS_Raw_Evs_csv",
+						"type": "DatasetReference"
+					},
+					"name": "logSkippedMigrated"
+				}
+			],
+			"transformations": [
+				{
+					"name": "transformStatusAndSource"
+				},
+				{
+					"name": "removeDuplicatesInSource"
+				},
+				{
+					"name": "joinWithSource"
+				},
+				{
+					"name": "skipStream"
+				},
+				{
+					"name": "existingAlls"
+				},
+				{
+					"name": "markForInsert"
+				},
+				{
+					"name": "markForUpdate"
+				},
+				{
+					"name": "combinedStream"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          fn as string,",
+				"          ln as string,",
+				"          rn as string,",
+				"          oid as string,",
+				"          po as string,",
+				"          gname as string,",
+				"          status as string,",
+				"          empid as integer,",
+				"          status_date as timestamp,",
+				"          is_foreigner as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> sourceEmployees",
+				"source(output(",
+				"          rn as string,",
+				"          oid as string,",
+				"          source as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT DISTINCT rn, oid, source FROM employee_profile',",
+				"     format: 'query') ~> existingAllSources",
+				"sourceEmployees derive(status = iif(status == 'Идэвхтэй', 1, iif(status == 'Ажлаас Гарсан', 2, iif(status == 'Шилжсэн', 2, iif(status == 'Түр Эзгүй', 3, toInteger(null()))))),",
+				"          is_foreigner = iif(is_foreigner == true(), 1, 0),",
+				"          source = 0,",
+				"          rn = trim(toString(rn)),",
+				"          oid = trim(toString(oid)),",
+				"          gname_number = toInteger(regexReplace(gname, '[^0-9]', ''))) ~> transformStatusAndSource",
+				"transformStatusAndSource aggregate(groupBy(rn,",
+				"          oid),",
+				"     fn = last(fn),",
+				"          ln = last(ln),",
+				"          po = last(po),",
+				"          gname = last(gname),",
+				"          status = last(status),",
+				"          empid = last(empid),",
+				"          status_date = max(status_date),",
+				"          is_foreigner = last(is_foreigner),",
+				"          source = last(source),",
+				"          gname_number = last(gname_number)) ~> removeDuplicatesInSource",
+				"removeDuplicatesInSource, existingAlls join(rn == existing_rn",
+				"     && oid == existing_oid,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinWithSource",
+				"joinWithSource split(isNull(existing_rn),",
+				"     !isNull(existing_rn) && existing_source == 0,",
+				"     disjoint: false) ~> skipStream@(insertStream, updateStream, skipStream)",
+				"existingAllSources select(mapColumn(",
+				"          existing_rn = rn,",
+				"          existing_oid = oid,",
+				"          existing_source = source",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> existingAlls",
+				"skipStream@insertStream alterRow(insertIf(true())) ~> markForInsert",
+				"skipStream@updateStream alterRow(updateIf(true())) ~> markForUpdate",
+				"markForInsert, markForUpdate union(byName: true)~> combinedStream",
+				"combinedStream sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id as integer,",
+				"          fn as string,",
+				"          rn as string,",
+				"          ln as string,",
+				"          oid as string,",
+				"          po as string,",
+				"          gname as string,",
+				"          empid as integer,",
+				"          im as string,",
+				"          source as string,",
+				"          created_at as timestamp,",
+				"          updated_at as timestamp,",
+				"          status_date as timestamp,",
+				"          status as integer,",
+				"          gname_number as integer,",
+				"          is_foreigner as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:true,",
+				"     keys:['rn','oid','source'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> upsertEmployees",
+				"markForUpdate sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          fn as string,",
+				"          ln as string,",
+				"          rn as string,",
+				"          oid as string,",
+				"          po as string,",
+				"          gname as string,",
+				"          status as string,",
+				"          empid as string,",
+				"          status_date as string,",
+				"          is_foreigner as string",
+				"     ),",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> archiveToDataLake",
+				"skipStream@skipStream sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          fn as string,",
+				"          ln as string,",
+				"          rn as string,",
+				"          oid as string,",
+				"          po as string,",
+				"          gname as string,",
+				"          status as string,",
+				"          empid as string,",
+				"          status_date as string,",
+				"          is_foreigner as string",
+				"     ),",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> logSkippedMigrated"
+			]
+		}
+	}
+}

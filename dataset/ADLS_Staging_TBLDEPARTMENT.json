@@ -1,0 +1,75 @@
+{
+	"name": "ADLS_Staging_TBLDEPARTMENT",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cwfolder": {
+				"type": "String",
+				"defaultValue": "TBLDEPARTMENT"
+			}
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@dataset().cwfolder",
+					"type": "Expression"
+				},
+				"fileSystem": "hr-staging"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "DEPID",
+				"type": "INT_16"
+			},
+			{
+				"name": "DEPCODE",
+				"type": "UTF8"
+			},
+			{
+				"name": "NAME",
+				"type": "UTF8"
+			},
+			{
+				"name": "ISACTIVE",
+				"type": "BOOLEAN"
+			},
+			{
+				"name": "PARENTID",
+				"type": "UTF8"
+			},
+			{
+				"name": "CREATED",
+				"type": "UTF8"
+			},
+			{
+				"name": "UPDATED",
+				"type": "UTF8"
+			},
+			{
+				"name": "COMPANYID",
+				"type": "UTF8"
+			},
+			{
+				"name": "DEPTYPEID",
+				"type": "INT_16"
+			},
+			{
+				"name": "PATH",
+				"type": "UTF8"
+			},
+			{
+				"name": "PARENTPATH",
+				"type": "UTF8"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

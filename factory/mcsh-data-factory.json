@@ -1,0 +1,9 @@
+{
+	"name": "mcsh-data-factory",
+	"location": "southeastasia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "b59addf0-c00b-49d8-8b8c-9918294b41aa",
+		"tenantId": "1041f094-871f-4fab-ae58-17ae6f66dffa"
+	}
+}

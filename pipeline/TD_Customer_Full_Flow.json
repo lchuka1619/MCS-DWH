@@ -1,0 +1,196 @@
+{
+	"name": "TD_Customer_Full_Flow",
+	"properties": {
+		"activities": [
+			{
+				"name": "Customer_DBToCSV",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": {
+							"value": "select\n    CusID,\n    REPLACE(REPLACE(CusName, CHAR(10), ''), CHAR(13), '') AS CusName,\n    REPLACE(REPLACE(REPLACE(cusAddress, CHAR(10), ''), CHAR(13), ''), '\"', '') AS cusAddress,\n    ISISChannelID,\n    OwnerID,\n    REPLACE(REPLACE(OwnerName, CHAR(10), ''), CHAR(13), '') AS OwnerName,\n    REPLACE(REPLACE(INN, CHAR(10), ''), CHAR(13), '') AS INN,\n    REPLACE(REPLACE(CusType, CHAR(10), ''), CHAR(13), '') AS StoreTypeName,\n    REPLACE(REPLACE(Region, CHAR(10), ''), CHAR(13), '') AS  Region,\n    REPLACE(REPLACE(SumNer, CHAR(10), ''), CHAR(13), '') AS SumNer,\n    CreateDate,\n    UpdateDate\nfrom BigOneFullCustomers_D",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"validateDataConsistency": true,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "FMCG_SQLServer_QVReports",
+						"type": "DatasetReference",
+						"parameters": {
+							"cw_table": {
+								"value": "@pipeline().parameters.src_customer_table",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ADLS_Raw_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"csv_fileName": {
+								"value": "@pipeline().parameters.dest_customer_file",
+								"type": "Expression"
+							},
+							"csv_directory": {
+								"value": "@pipeline().parameters.dest_folder",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "TradeshopGPS_DBToCSV",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Customer_DBToCSV",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"validateDataConsistency": true,
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Warning",
+							"enableReliableLogging": true
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "ADLS_FMCS_RAW",
+								"type": "LinkedServiceReference"
+							},
+							"path": "fmcg-raw/logs"
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "FMCG_SQLServer_QVReports",
+						"type": "DatasetReference",
+						"parameters": {
+							"cw_table": {
+								"value": "@pipeline().parameters.src_tradeshop_gps_table",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ADLS_Raw_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"csv_fileName": {
+								"value": "@pipeline().parameters.dest_gps_file",
+								"type": "Expression"
+							},
+							"csv_directory": {
+								"value": "@pipeline().parameters.dest_folder",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"src_customer_table": {
+				"type": "string",
+				"defaultValue": "BigOneFullCustomers_D"
+			},
+			"src_tradeshop_gps_table": {
+				"type": "string",
+				"defaultValue": "TradeshopGPS_TD"
+			},
+			"dest_folder": {
+				"type": "string",
+				"defaultValue": "td_dwh_sink"
+			},
+			"dest_customer_file": {
+				"type": "string",
+				"defaultValue": "td_dwh_full_customer.csv"
+			},
+			"dest_gps_file": {
+				"type": "string",
+				"defaultValue": "td_dwh_full_trade_shop_gps.csv"
+			}
+		},
+		"folder": {
+			"name": "TD Pipelines/Customer"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-11-11T04:37:21Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

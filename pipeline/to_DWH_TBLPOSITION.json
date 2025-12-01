@@ -1,0 +1,46 @@
+{
+	"name": "to_DWH_TBLPOSITION",
+	"properties": {
+		"activities": [
+			{
+				"name": "TBLPOSITION_From_Staging_to_DWH",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "TBLPOSITION_From_Staging_to_DWH",
+						"type": "DataFlowReference",
+						"parameters": {
+							"cwfolder": "\"TBLPOSITION\"",
+							"cwtablename": "\"dim_position\""
+						},
+						"datasetParameters": {
+							"source1": {
+								"cwfolder": "TBLPOSITION"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"folder": {
+			"name": "HR Pipelines/DW_Mysql"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-11-27T09:26:11Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

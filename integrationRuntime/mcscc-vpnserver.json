@@ -1,0 +1,9 @@
+{
+	"name": "mcscc-vpnserver",
+	"properties": {
+		"type": "SelfHosted",
+		"typeProperties": {
+			"selfContainedInteractiveAuthoringEnabled": false
+		}
+	}
+}

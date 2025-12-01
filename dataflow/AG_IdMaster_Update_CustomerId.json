@@ -1,0 +1,73 @@
+{
+	"name": "AG_IdMaster_Update_CustomerId",
+	"properties": {
+		"folder": {
+			"name": "AG"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DataService_TestMerchant",
+						"type": "DatasetReference"
+					},
+					"name": "tradeshopAgInfoTable"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DataService_TestMerchant",
+						"type": "DatasetReference"
+					},
+					"name": "updateAgCustomerInIdMaster"
+				}
+			],
+			"transformations": [
+				{
+					"name": "groupByTradeShopId"
+				},
+				{
+					"name": "updateExistingData"
+				},
+				{
+					"name": "select1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          customer_ag_id as integer,",
+				"          customer_register as string,",
+				"          tradeshop_id_gps as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'Select \\n    customer_ag_id,\\n    customer_register,\\n    tradeshop_id_gps\\nfrom trade_shop_ag_info',",
+				"     format: 'query') ~> tradeshopAgInfoTable",
+				"tradeshopAgInfoTable aggregate(groupBy(customer_register,",
+				"          tradeshop_id_gps),",
+				"     customer_ag_id = max(customer_ag_id)) ~> groupByTradeShopId",
+				"select1 alterRow(updateIf(true())) ~> updateExistingData",
+				"groupByTradeShopId select(mapColumn(",
+				"          customer_register,",
+				"          trade_shop_ag_id = tradeshop_id_gps,",
+				"          customer_ag_id",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"updateExistingData sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['trade_shop_ag_id'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> updateAgCustomerInIdMaster"
+			]
+		}
+	}
+}

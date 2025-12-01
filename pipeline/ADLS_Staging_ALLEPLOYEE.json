@@ -1,0 +1,49 @@
+{
+	"name": "ADLS_Staging_ALLEPLOYEE",
+	"properties": {
+		"activities": [
+			{
+				"name": "ADLS_Staging_SIGRADE",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "ADLS_Staging_SIGRADE",
+						"type": "DataFlowReference",
+						"parameters": {
+							"cwfilename": "\"SIGRADE\""
+						},
+						"datasetParameters": {
+							"source1": {
+								"cwfolder": "GreenErp",
+								"cwfilename": "SIGRADE.csv"
+							},
+							"sink1": {
+								"cwfolder": "SIGRADE"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"folder": {
+			"name": "HR Pipelines/EVS"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-11-19T10:54:57Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

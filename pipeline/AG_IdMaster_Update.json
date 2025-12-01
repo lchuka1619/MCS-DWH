@@ -1,0 +1,45 @@
+{
+	"name": "AG_IdMaster_Update",
+	"properties": {
+		"activities": [
+			{
+				"name": "AG_IdMaster_Update_CustomerId",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "AG_IdMaster_Update_CustomerId",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"tradeshopAgInfoTable": {
+								"cw_table": "trade_shop_ag_info"
+							},
+							"updateAgCustomerInIdMaster": {
+								"cw_table": "id_master"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"folder": {
+			"name": "AG Pipelines/Customer"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-07-18T03:33:42Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

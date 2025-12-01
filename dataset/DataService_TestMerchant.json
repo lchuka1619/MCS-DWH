@@ -1,0 +1,24 @@
+{
+	"name": "DataService_TestMerchant",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Merchant_DataService_DB",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cw_table": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureMySqlTable",
+		"schema": [],
+		"typeProperties": {
+			"tableName": {
+				"value": "@dataset().cw_table",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

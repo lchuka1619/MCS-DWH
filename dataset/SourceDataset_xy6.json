@@ -1,0 +1,16 @@
+{
+	"name": "SourceDataset_xy6",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MCS_HR_GreenERP_SC",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "OracleTable",
+		"schema": [],
+		"typeProperties": {
+			"table": "newQuery0"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

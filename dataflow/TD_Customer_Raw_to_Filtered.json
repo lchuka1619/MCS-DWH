@@ -1,0 +1,108 @@
+{
+	"name": "TD_Customer_Raw_to_Filtered",
+	"properties": {
+		"folder": {
+			"name": "TD"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ADLS_Raw_CSV",
+						"type": "DatasetReference"
+					},
+					"name": "tdRawFullCustomerCSV"
+				},
+				{
+					"dataset": {
+						"referenceName": "ADLS_Raw_CSV",
+						"type": "DatasetReference"
+					},
+					"name": "tdRawTradeShopGpsCSV"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ADLS_Filtered_CSV",
+						"type": "DatasetReference"
+					},
+					"name": "tdFilteredCSV"
+				}
+			],
+			"transformations": [
+				{
+					"name": "TradeShopIDLeftJoin"
+				},
+				{
+					"name": "ColumnFiltering",
+					"description": "Renaming and (removing) TradeShopIDLeftJoin to ColumnFiltering with columns"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          CusID as integer,",
+				"          CusName as string,",
+				"          cusAddress as string,",
+				"          ISISChannelID as short,",
+				"          OwnerID as integer,",
+				"          OwnerName as string,",
+				"          INN as string,",
+				"          StoreTypeName as string,",
+				"          Region as string,",
+				"          SumNer as string,",
+				"          CreateDate as string,",
+				"          UpdateDate as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     partitionBy('hash', 1)) ~> tdRawFullCustomerCSV",
+				"source(output(",
+				"          TradeshopID as integer,",
+				"          CreatedDate as string,",
+				"          UpdatedDate as string,",
+				"          pickpackid as string,",
+				"          Longitude as string,",
+				"          Latitude as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     partitionBy('hash', 1)) ~> tdRawTradeShopGpsCSV",
+				"tdRawFullCustomerCSV, tdRawTradeShopGpsCSV join(CusID == TradeshopID,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'off')~> TradeShopIDLeftJoin",
+				"TradeShopIDLeftJoin select(mapColumn(",
+				"          cusid_td = CusID,",
+				"          trade_shop_name = CusName,",
+				"          full_address = cusAddress,",
+				"          customer_td_id = OwnerID,",
+				"          customer_name = OwnerName,",
+				"          store_type = StoreTypeName,",
+				"          customer_register = INN,",
+				"          channel_id = ISISChannelID,",
+				"          district = Region,",
+				"          khoroo = SumNer,",
+				"          customer_created_date = CreateDate,",
+				"          longitude = Longitude,",
+				"          latitude = Latitude",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> ColumnFiltering",
+				"ColumnFiltering sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['td_dwh_customer_full.csv'],",
+				"     umask: 0775,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> tdFilteredCSV"
+			]
+		}
+	}
+}

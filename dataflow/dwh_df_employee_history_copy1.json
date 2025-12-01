@@ -1,0 +1,68 @@
+{
+	"name": "dwh_df_employee_history_copy1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Dataset_Source",
+						"type": "DatasetReference"
+					},
+					"name": "employee"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedText1",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filter1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          employee_key as long,",
+				"          source_system_code as string,",
+				"          source_employee_id as string,",
+				"          company_key as integer,",
+				"          employee_code as string,",
+				"          registration_number as string,",
+				"          family_name as string,",
+				"          last_name as string,",
+				"          first_name as string,",
+				"          gender as string,",
+				"          birth_date as date,",
+				"          nationality_id as integer,",
+				"          employment_status as string,",
+				"          effective_start_date as timestamp,",
+				"          effective_end_date as timestamp,",
+				"          is_current_record as boolean,",
+				"          source_created_date as timestamp,",
+				"          source_updated_date as timestamp,",
+				"          dw_created_date as timestamp,",
+				"          dw_updated_date as timestamp,",
+				"          etl_batch_id as long",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> employee",
+				"employee filter(source_employee_id=='18096') ~> filter1",
+				"filter1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}

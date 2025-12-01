@@ -1,0 +1,137 @@
+{
+	"name": "EmployeeProfile_From_GreenHR",
+	"properties": {
+		"folder": {
+			"name": "HR/EVS"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "evs_csv",
+						"type": "DatasetReference"
+					},
+					"name": "sourceEmployees"
+				},
+				{
+					"dataset": {
+						"referenceName": "Evs_employee",
+						"type": "DatasetReference"
+					},
+					"name": "existingEmployees"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Evs_employee",
+						"type": "DatasetReference"
+					},
+					"name": "Employee",
+					"rejectedDataLinkedService": {
+						"referenceName": "linkedService_err",
+						"type": "LinkedServiceReference"
+					}
+				}
+			],
+			"transformations": [
+				{
+					"name": "DerivedColumns"
+				},
+				{
+					"name": "leftOuterJoin"
+				},
+				{
+					"name": "FilterNewOnlys"
+				},
+				{
+					"name": "selectExist"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          fn as string,",
+				"          ln as string,",
+				"          rn as string,",
+				"          oid as string,",
+				"          po as string,",
+				"          gname as string,",
+				"          status as string,",
+				"          empid as short,",
+				"          status_date as string,",
+				"          is_foreigner as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: false) ~> sourceEmployees",
+				"source(output(",
+				"          id as integer,",
+				"          rn as string,",
+				"          oid as string,",
+				"          source as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT id, rn, oid,source FROM employee_profile WHERE source = 0',",
+				"     format: 'query') ~> existingEmployees",
+				"sourceEmployees derive(status = iif(status == 'Идэвхтэй', 1, \r",
+				"    iif(status == 'Ажлаас Гарсан', 2, \r",
+				"        iif(status == 'Шилжсэн', 2, \r",
+				"            iif(status == 'Түр Эзгүй', 3, toInteger(null()))\r",
+				"        )\r",
+				"    )\r",
+				"),",
+				"          is_foreigner = iif(is_foreigner, 1, 0),",
+				"          source = 0) ~> DerivedColumns",
+				"DerivedColumns, selectExist join(rn == rn_exist",
+				"     && oid == oid_exist,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> leftOuterJoin",
+				"leftOuterJoin filter(isNull(rn_exist)) ~> FilterNewOnlys",
+				"existingEmployees select(mapColumn(",
+				"          rn_exist = rn,",
+				"          oid_exist = oid,",
+				"          source_exist = source",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectExist",
+				"FilterNewOnlys alterRow(upsertIf(isNull(rn_exist)||source==0)) ~> alterRow1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     input(",
+				"          id as integer,",
+				"          fn as string,",
+				"          rn as string,",
+				"          ln as string,",
+				"          oid as string,",
+				"          po as string,",
+				"          gname as string,",
+				"          empid as integer,",
+				"          im as string,",
+				"          source as string,",
+				"          created_at as timestamp,",
+				"          updated_at as timestamp,",
+				"          status_date as timestamp,",
+				"          status as integer,",
+				"          gname_number as integer,",
+				"          is_foreigner as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:true,",
+				"     keys:['rn',(oid),'source'],",
+				"     format: 'table',",
+				"     saveOrder: 1) ~> Employee"
+			]
+		}
+	}
+}

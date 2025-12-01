@@ -1,0 +1,353 @@
+{
+	"name": "dwh_df_employee_history_copy2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Dataset_Source",
+						"type": "DatasetReference"
+					},
+					"name": "employeeHist"
+				},
+				{
+					"dataset": {
+						"referenceName": "Dataset_Source",
+						"type": "DatasetReference"
+					},
+					"name": "company"
+				},
+				{
+					"dataset": {
+						"referenceName": "Dataset_Source",
+						"type": "DatasetReference"
+					},
+					"name": "employee"
+				},
+				{
+					"dataset": {
+						"referenceName": "Dataset_Source",
+						"type": "DatasetReference"
+					},
+					"name": "department"
+				},
+				{
+					"dataset": {
+						"referenceName": "Dataset_Source",
+						"type": "DatasetReference"
+					},
+					"name": "position"
+				},
+				{
+					"dataset": {
+						"referenceName": "Dataset_Source",
+						"type": "DatasetReference"
+					},
+					"name": "grade"
+				},
+				{
+					"dataset": {
+						"referenceName": "Dataset_Source",
+						"type": "DatasetReference"
+					},
+					"name": "level"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Dataset_Sink",
+						"type": "DatasetReference"
+					},
+					"name": "sink1",
+					"rejectedDataLinkedService": {
+						"referenceName": "linkedService_err",
+						"type": "LinkedServiceReference"
+					}
+				}
+			],
+			"transformations": [
+				{
+					"name": "joinCompany"
+				},
+				{
+					"name": "sourcesystemcode"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "joinEmployee"
+				},
+				{
+					"name": "joinDepart"
+				},
+				{
+					"name": "joinPosition"
+				},
+				{
+					"name": "joinGrade"
+				},
+				{
+					"name": "joinLevel"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "selectEmployee"
+				},
+				{
+					"name": "filter1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          HISTORYID as long,",
+				"          EMPID as long,",
+				"          BEGINDATE as string,",
+				"          ENDDATE as string,",
+				"          ORDERID as long,",
+				"          ORDERTYPE as string,",
+				"          COMPANYID as string,",
+				"          DEPID as string,",
+				"          POSITIONID as long,",
+				"          GRADEID as long,",
+				"          LEVELID as long,",
+				"          BASEWAGE as decimal(18,4),",
+				"          BASEWAGECURRCODE as string,",
+				"          TSTAMP as timestamp,",
+				"          CREATED as string,",
+				"          CREATEDBY as string,",
+				"          UPDATED as string,",
+				"          UPDATEDBY as string,",
+				"          IPADDRESS as string,",
+				"          MACADDRESS as string,",
+				"          ORDERNO as string,",
+				"          ISMANUALHIST as string,",
+				"          ISNOTLOCALHIST as string,",
+				"          LEGALENTITYID as long,",
+				"          OLDDEPNAME as string,",
+				"          JOBID as long,",
+				"          NOTE as string,",
+				"          INSURETYPEID as long,",
+				"          LABOURCONDITION as string,",
+				"          ISMULT as string,",
+				"          MULTYEAR as decimal(18,4),",
+				"          HISTREASON as string,",
+				"          HISTREASONNAMES as string,",
+				"          TOTALWAGE as decimal(18,4),",
+				"          EVOLVEWAGE as decimal(18,4),",
+				"          CALCPERCENT as decimal(18,4),",
+				"          GRADETYPEID as long,",
+				"          LEVELNO as long,",
+				"          FTEMAINID as long",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> employeeHist",
+				"source(output(",
+				"          company_key as integer,",
+				"          company_code as string,",
+				"          company_name as string,",
+				"          is_active as boolean,",
+				"          source_system_code as string,",
+				"          source_created_date as timestamp,",
+				"          source_updated_date as timestamp,",
+				"          dw_created_date as timestamp,",
+				"          dw_updated_date as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> company",
+				"source(output(",
+				"          employee_key as long,",
+				"          source_system_code as string,",
+				"          source_employee_id as string,",
+				"          company_key as integer,",
+				"          employee_code as string,",
+				"          registration_number as string,",
+				"          family_name as string,",
+				"          last_name as string,",
+				"          first_name as string,",
+				"          gender as string,",
+				"          birth_date as date,",
+				"          nationality_id as integer,",
+				"          employment_status as string,",
+				"          effective_start_date as timestamp,",
+				"          effective_end_date as timestamp,",
+				"          is_current_record as boolean,",
+				"          source_created_date as timestamp,",
+				"          source_updated_date as timestamp,",
+				"          dw_created_date as timestamp,",
+				"          dw_updated_date as timestamp,",
+				"          etl_batch_id as long",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> employee",
+				"source(output(",
+				"          department_key as integer,",
+				"          source_system_code as string,",
+				"          source_department_id as string,",
+				"          company_key as integer,",
+				"          department_code as string,",
+				"          department_name as string,",
+				"          parent_department_key as integer,",
+				"          department_level as string,",
+				"          is_active as boolean,",
+				"          effective_start_date as timestamp,",
+				"          effective_end_date as timestamp,",
+				"          is_current_record as boolean,",
+				"          dw_created_date as timestamp,",
+				"          dw_updated_date as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> department",
+				"source(output(",
+				"          position_key as integer,",
+				"          source_system_code as string,",
+				"          source_position_id as string,",
+				"          company_key as integer,",
+				"          position_code as string,",
+				"          position_name as string,",
+				"          position_category as string,",
+				"          position_level as string,",
+				"          is_management as boolean,",
+				"          is_active as boolean,",
+				"          effective_start_date as timestamp,",
+				"          effective_end_date as timestamp,",
+				"          is_current_record as boolean,",
+				"          dw_created_date as timestamp,",
+				"          dw_updated_date as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> position",
+				"source(output(",
+				"          grade_key as integer,",
+				"          grade_id as integer,",
+				"          code as string,",
+				"          grade_no as integer,",
+				"          name as string,",
+				"          is_active as boolean,",
+				"          source_system_code as string,",
+				"          source_created_date as timestamp,",
+				"          source_updated_date as timestamp,",
+				"          dw_created_date as timestamp,",
+				"          dw_updated_date as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> grade",
+				"source(output(",
+				"          LEVELID as long,",
+				"          CODE as string,",
+				"          NAME as string,",
+				"          ISACTIVE as string,",
+				"          CREATED as string,",
+				"          CREATEDBY as string,",
+				"          UPDATED as string,",
+				"          UPDATEDBY as string,",
+				"          IPADDRESS as string,",
+				"          MACADDRESS as string,",
+				"          TSTAMP as timestamp,",
+				"          MASTERID as long,",
+				"          ISMASTER as string,",
+				"          source_system_code as string,",
+				"          source_created_date as timestamp,",
+				"          source_updated_date as timestamp,",
+				"          dw_created_date as timestamp,",
+				"          dw_updated_date as timestamp,",
+				"          level_id as long,",
+				"          is_active as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> level",
+				"employeeHist, company join(COMPANYID == company_code,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinCompany",
+				"joinLevel derive(source_system_code = 0,",
+				"          is_current_position = 1,",
+				"          is_active_employment = 1,",
+				"          begin_date = toDate(BEGINDATE, 'yyyy-MM-dd'),",
+				"          end_date = toDate(ENDDATE, 'yyyy-MM-dd'),",
+				"          source_history_id = HISTORYID,",
+				"          source_order_id = ORDERID,",
+				"          order_type = ORDERTYPE,",
+				"          order_number = ORDERNO,",
+				"          level_number = employeeHist@LEVELID,",
+				"          base_wage = BASEWAGE,",
+				"          base_wage_currency = BASEWAGECURRCODE,",
+				"          insurance_type_id = INSURETYPEID,",
+				"          labour_condition = LABOURCONDITION,",
+				"          source_created_date = toTimestamp(employeeHist@CREATED, 'yyyy.MM.dd HH:mm:ss'),",
+				"          source_updated_date = toTimestamp(employeeHist@UPDATED, 'yyyy.MM.dd HH:mm:ss'),",
+				"          dw_created_date = currentUTC(),",
+				"          dw_updated_date = currentUTC(),",
+				"          etl_batch_id = toLong(currentUTC())) ~> sourcesystemcode",
+				"sourcesystemcode alterRow(upsertIf(!isNull(source_history_id))) ~> alterRow1",
+				"joinCompany, selectEmployee join(toString(EMPID) == toString(source_employee_id),",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinEmployee",
+				"derivedColumn1, department join(toString(DEPID) == source_department_id,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinDepart",
+				"joinDepart, position join(toString(POSITIONID) == source_position_id,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinPosition",
+				"joinPosition, grade join(GRADEID == grade_id,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinGrade",
+				"joinGrade, level join(employeeHist@LEVELID == level@LEVELID,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinLevel",
+				"joinEmployee derive({emp_left } = toString(EMPID),",
+				"          emp_right = toString(source_employee_id)) ~> derivedColumn1",
+				"employee select(mapColumn(",
+				"          employee_key,",
+				"          source_system_code,",
+				"          source_employee_id,",
+				"          company_key,",
+				"          employee_code",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectEmployee",
+				"selectEmployee filter(source_employee_id=='18096') ~> filter1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:true,",
+				"     keys:['source_history_id'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+			]
+		}
+	}
+}

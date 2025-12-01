@@ -1,0 +1,116 @@
+{
+	"name": "AzureMySqlTable1_POSITION",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Azure_DWH_HR_link",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cwtablename": {
+				"type": "String",
+				"defaultValue": "dim_position"
+			}
+		},
+		"annotations": [],
+		"type": "AzureMySqlTable",
+		"schema": [
+			{
+				"name": "position_key",
+				"type": "int",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "source_system_code",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "source_position_id",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "company_key",
+				"type": "int",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "position_code",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "position_name",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "position_category",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "position_level",
+				"type": "varchar",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "is_management",
+				"type": "int",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "is_active",
+				"type": "int",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "effective_start_date",
+				"type": "datetime",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "effective_end_date",
+				"type": "datetime",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "is_current_record",
+				"type": "int",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "dw_created_date",
+				"type": "datetime",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "dw_updated_date",
+				"type": "datetime",
+				"precision": 0,
+				"scale": 0
+			}
+		],
+		"typeProperties": {
+			"tableName": {
+				"value": "@dataset().cwtablename",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

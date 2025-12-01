@@ -1,0 +1,102 @@
+{
+	"name": "ADLS_Staging_TBLPOSITION",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cwfolder": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@dataset().cwfolder",
+					"type": "Expression"
+				},
+				"fileSystem": "hr-staging"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "POSITIONID",
+				"type": "INT_16"
+			},
+			{
+				"name": "COMPANYID",
+				"type": "UTF8"
+			},
+			{
+				"name": "DEPID",
+				"type": "INT_16"
+			},
+			{
+				"name": "POSGROUPID",
+				"type": "INT_16"
+			},
+			{
+				"name": "CODE",
+				"type": "UTF8"
+			},
+			{
+				"name": "NAME",
+				"type": "UTF8"
+			},
+			{
+				"name": "EMPLOYMENTTYPEID",
+				"type": "INT_16"
+			},
+			{
+				"name": "GRADEID",
+				"type": "INT_16"
+			},
+			{
+				"name": "VACANCYDAYS",
+				"type": "INT_16"
+			},
+			{
+				"name": "LABOURCONDITION",
+				"type": "UTF8"
+			},
+			{
+				"name": "ISACTIVE",
+				"type": "BOOLEAN"
+			},
+			{
+				"name": "CREATED",
+				"type": "UTF8"
+			},
+			{
+				"name": "UPDATED",
+				"type": "UTF8"
+			},
+			{
+				"name": "JOBDESCID",
+				"type": "INT_16"
+			},
+			{
+				"name": "JOBID",
+				"type": "INT_16"
+			},
+			{
+				"name": "TYPE",
+				"type": "UTF8"
+			},
+			{
+				"name": "POSITIONOCCID",
+				"type": "INT_16"
+			},
+			{
+				"name": "POSLEVEL",
+				"type": "INT_16"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

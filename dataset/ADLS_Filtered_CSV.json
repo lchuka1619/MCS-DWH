@@ -1,0 +1,41 @@
+{
+	"name": "ADLS_Filtered_CSV",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ADLS_FMCS_RAW",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"csv_directory": {
+				"type": "string"
+			},
+			"csv_fileName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().csv_fileName",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().csv_directory",
+					"type": "Expression"
+				},
+				"fileSystem": "fmcg-filtered"
+			},
+			"columnDelimiter": ",",
+			"compressionCodec": null,
+			"compressionLevel": "Optimal",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

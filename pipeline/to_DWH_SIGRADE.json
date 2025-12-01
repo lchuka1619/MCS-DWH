@@ -1,0 +1,45 @@
+{
+	"name": "to_DWH_SIGRADE",
+	"properties": {
+		"activities": [
+			{
+				"name": "SIGRADE_From_Staging_to_DWH",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "SIGRADE_From_Staging_to_DWH",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"source1": {
+								"cwfolder": "SIGRADE"
+							},
+							"sink1": {
+								"cwtablename": "dim_grade"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"folder": {
+			"name": "HR Pipelines/DW_Mysql"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-11-27T09:26:10Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

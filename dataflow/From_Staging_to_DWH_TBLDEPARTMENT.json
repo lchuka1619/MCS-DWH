@@ -1,0 +1,144 @@
+{
+	"name": "From_Staging_to_DWH_TBLDEPARTMENT",
+	"properties": {
+		"folder": {
+			"name": "HR"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ADLS_Staging_TBLDEPARTMENT",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureMySqlTable_COMPANY",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AzureMySqlTable_Department",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "joined"
+				},
+				{
+					"name": "derivedclean"
+				},
+				{
+					"name": "scdMark"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     cwfolder as string (\"TBLDEPARTMENT\"),",
+				"     cwtablename as string (\"dim_department\")",
+				"}",
+				"source(output(",
+				"          DEPID as short,",
+				"          DEPCODE as string,",
+				"          NAME as string,",
+				"          ISACTIVE as boolean,",
+				"          PARENTID as string,",
+				"          CREATED as string,",
+				"          UPDATED as string,",
+				"          COMPANYID as string,",
+				"          DEPTYPEID as short,",
+				"          PATH as string,",
+				"          PARENTPATH as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> source1",
+				"source(output(",
+				"          company_key as integer,",
+				"          company_code as string,",
+				"          company_name as string,",
+				"          is_active as boolean,",
+				"          source_system_code as string,",
+				"          source_created_date as timestamp,",
+				"          source_updated_date as timestamp,",
+				"          dw_created_date as timestamp,",
+				"          dw_updated_date as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source2",
+				"source1, source2 join(COMPANYID == company_code,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joined",
+				"joined derive(source_department_id = toString(DEPID),",
+				"          department_code = toString(DEPCODE),",
+				"          department_name = trim(NAME),",
+				"          department_type_id = DEPTYPEID,",
+				"          parent_department_key_raw = trim(PARENTID),",
+				"          raw_parent_path = iif(isNull(PARENTPATH) || trim(PARENTPATH) == '', '', trim(PARENTPATH)),",
+				"          clean_parent_path = iif(PARENTPATH == '', '', trim(replace(replace(PARENTPATH, '|', '/'), '//', '/'))),",
+				"          department_path = iif(isNull(PATH) || trim(PATH) == '', '', trim(replace(replace(PATH, '|', '/'), '//', '/'))),",
+				"          is_active_int = iif(ISACTIVE == true(), 1, 0),",
+				"          effective_start_date = iif(isNull(CREATED), currentUTC(), toTimestamp(CREATED, 'yyyy.MM.dd HH:mm:ss')),",
+				"          effective_end_date = iif(isNull(UPDATED), toTimestamp('9999-12-31T00:00:00Z'), toTimestamp(UPDATED, 'yyyy.MM.dd HH:mm:ss')),",
+				"          dw_created_date = currentUTC(),",
+				"          dw_updated_date = currentUTC(),",
+				"          etl_batch_id = toLong(currentUTC()),",
+				"          company_key = company_key,",
+				"          company_code = company_code) ~> derivedclean",
+				"derivedclean derive(business_hash = md5(concat(",
+				"        iifNull(department_code, ''), '|',",
+				"        iifNull(department_name, ''), '|',",
+				"        iifNull(toString(department_type_id), ''), '|',",
+				"        iifNull(parent_department_key_raw, ''), '|',",
+				"        iifNull(department_path, ''), '|',",
+				"        iifNull(toString(is_active_int), ''), '|',",
+				"        iifNull(toString(effective_start_date), ''), '|',",
+				"        iifNull(toString(effective_end_date), '')",
+				"    ) )) ~> scdMark",
+				"scdMark sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          department_key as integer,",
+				"          source_system_code as string,",
+				"          source_department_id as string,",
+				"          company_key as integer,",
+				"          department_code as string,",
+				"          department_name as string,",
+				"          parent_department_key as integer,",
+				"          department_level as string,",
+				"          is_active as integer,",
+				"          effective_start_date as timestamp,",
+				"          effective_end_date as timestamp,",
+				"          is_current_record as integer,",
+				"          dw_created_date as timestamp,",
+				"          dw_updated_date as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 1,",
+				"     upsertKeyColumns: ['source_department_id','company_key']) ~> sink1"
+			]
+		}
+	}
+}

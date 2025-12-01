@@ -1,0 +1,24 @@
+{
+	"name": "MCS_HR_GreenERP_SC",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "MCS_HR_GreenERP_SC\n",
+		"annotations": [],
+		"type": "Oracle",
+		"version": "2.0",
+		"typeProperties": {
+			"server": "green-erp-db.ca0tieoyjuvl.ap-east-1.rds.amazonaws.com:1521/ORCL",
+			"authenticationType": "Basic",
+			"username": "hrms_prod",
+			"encryptionClient": "accepted",
+			"encryptionTypesClient": "(AES128, AES192, AES256, 3DES112, 3DES168)",
+			"cryptoChecksumClient": "accepted",
+			"cryptoChecksumTypesClient": "(SHA1, SHA256, SHA384, SHA512)",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJmYzRhNTBmOS0xNzFlLTQwYWItOTIwMC01NGZmNDk5MmYyOTkiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "mcscc-vpnserver",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

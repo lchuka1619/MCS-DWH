@@ -1,0 +1,66 @@
+{
+	"name": "to_DWH_TBLEMPEMPLHIST",
+	"properties": {
+		"activities": [
+			{
+				"name": "TBLEMPEMPLHIST_From_Staging_to_DWH",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "TBLEMPEMPLHIST_From_Staging_to_DWH",
+						"type": "DataFlowReference",
+						"parameters": {
+							"cwfolder": "\"TBLEMPEMPLHIST\""
+						},
+						"datasetParameters": {
+							"source1": {
+								"cwfolder": "TBLEMPEMPLHIST"
+							},
+							"source2": {
+								"cwtablename": "dim_employee"
+							},
+							"source3": {
+								"cwtablename": "dim_company"
+							},
+							"source4": {
+								"cwtablename": "dim_department"
+							},
+							"source5": {
+								"cwtablename": "dim_position"
+							},
+							"source6": {
+								"cwtablename": "dim_grade"
+							},
+							"source7": {
+								"cwtablename": "dim_level"
+							},
+							"sink1": {
+								"cwtablename": "fact_employee_history"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"folder": {
+			"name": "HR Pipelines/DW_Mysql"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-11-27T09:26:10Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,90 @@
+{
+	"name": "TBLCOMPANY_From_Staging_to_DWH",
+	"properties": {
+		"folder": {
+			"name": "HR"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ADLS_Staging_TBLCOMPANY",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AzureMySqlTable_COMPANY",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "transform1"
+				},
+				{
+					"name": "select1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          COMPANYID as string,",
+				"          NAME as string,",
+				"          CREATED as string,",
+				"          UPDATED as string,",
+				"          PARENTID as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> source1",
+				"source1 derive(company_code = COMPANYID,",
+				"          company_name = NAME,",
+				"          is_active = 1,",
+				"          source_system_code = '0',",
+				"          source_created_date = toTimestamp(CREATED),",
+				"          source_updated_date = toTimestamp(UPDATED),",
+				"          dw_created_date = currentUTC(),",
+				"          dw_updated_date = currentUTC()) ~> transform1",
+				"transform1 select(mapColumn(",
+				"          company_code,",
+				"          company_name,",
+				"          is_active,",
+				"          source_system_code,",
+				"          source_created_date,",
+				"          source_updated_date,",
+				"          dw_created_date,",
+				"          dw_updated_date",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     input(",
+				"          company_key as integer,",
+				"          company_code as string,",
+				"          company_name as string,",
+				"          is_active as boolean,",
+				"          source_system_code as string,",
+				"          source_created_date as timestamp,",
+				"          source_updated_date as timestamp,",
+				"          dw_created_date as timestamp,",
+				"          dw_updated_date as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     saveOrder: 1) ~> sink1"
+			]
+		}
+	}
+}

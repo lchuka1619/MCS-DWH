@@ -1,0 +1,103 @@
+{
+	"name": "Dataset_Source",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"tableName": {
+				"type": "string"
+			},
+			"schema": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "COMPANYID",
+				"type": "nvarchar"
+			},
+			{
+				"name": "NAME",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ADDRESS",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CREATED",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CREATEDBY",
+				"type": "nvarchar"
+			},
+			{
+				"name": "UPDATED",
+				"type": "nvarchar"
+			},
+			{
+				"name": "UPDATEDBY",
+				"type": "nvarchar"
+			},
+			{
+				"name": "IPADDRESS",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MACADDRESS",
+				"type": "nvarchar"
+			},
+			{
+				"name": "TSTAMP",
+				"type": "datetime2",
+				"scale": 6
+			},
+			{
+				"name": "BUSINESSTYPEID",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "PARENTID",
+				"type": "nvarchar"
+			},
+			{
+				"name": "REPGROUPID",
+				"type": "nvarchar"
+			},
+			{
+				"name": "PHONE",
+				"type": "nvarchar"
+			},
+			{
+				"name": "FAX",
+				"type": "nvarchar"
+			},
+			{
+				"name": "INTCOMPANYID",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "JDECOMPANY",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().schema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().tableName",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

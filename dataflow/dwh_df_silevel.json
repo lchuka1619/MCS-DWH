@@ -1,0 +1,81 @@
+{
+	"name": "dwh_df_silevel",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Dataset_Source",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Dataset_Sink",
+						"type": "DatasetReference"
+					},
+					"name": "sinkDimLevel"
+				}
+			],
+			"transformations": [
+				{
+					"name": "transform1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          LEVELID as long,",
+				"          CODE as string,",
+				"          NAME as string,",
+				"          ISACTIVE as string,",
+				"          CREATED as string,",
+				"          CREATEDBY as string,",
+				"          UPDATED as string,",
+				"          UPDATEDBY as string,",
+				"          IPADDRESS as string,",
+				"          MACADDRESS as string,",
+				"          TSTAMP as timestamp,",
+				"          MASTERID as long,",
+				"          ISMASTER as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"source1 derive(source_system_code = '0',",
+				"          source_created_date = toTimestamp(CREATED, 'yyyy.MM.dd HH:mm:ss'),",
+				"          source_updated_date = toTimestamp(UPDATED, 'yyyy.MM.dd HH:mm:ss'),",
+				"          dw_created_date = currentUTC(),",
+				"          dw_updated_date = currentUTC(),",
+				"          level_id = LEVELID,",
+				"          is_active = toInteger(1),",
+				"          level_name = NAME,",
+				"          level_code = CODE) ~> transform1",
+				"transform1 select(skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> select1",
+				"select1 alterRow(upsertIf(!isNull(level_id))) ~> alterRow1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:true,",
+				"     keys:['level_id'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkDimLevel"
+			]
+		}
+	}
+}

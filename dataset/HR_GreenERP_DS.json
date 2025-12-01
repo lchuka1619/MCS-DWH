@@ -1,0 +1,26 @@
+{
+	"name": "HR_GreenERP_DS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MCS_HR_GreenERP_SC",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"tableName": {
+				"type": "string",
+				"defaultValue": "HREMPLOYEE"
+			}
+		},
+		"annotations": [],
+		"type": "OracleTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "HRMS_PROD",
+			"table": {
+				"value": "@dataset().tableName",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

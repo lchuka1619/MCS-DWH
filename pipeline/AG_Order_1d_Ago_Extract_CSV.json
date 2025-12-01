@@ -1,0 +1,172 @@
+{
+	"name": "AG_Order_1d_Ago_Extract_CSV",
+	"properties": {
+		"activities": [
+			{
+				"name": "Order_DB_to_Raw",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [
+					{
+						"name": "Source",
+						"value": "dbo.BigOneFull"
+					},
+					{
+						"name": "Destination",
+						"value": "fmcg-raw/ag_dwh_sink/@{formatDateTime(pipeline().parameters.windowStart,'yyyy')}_@{formatDateTime(pipeline().parameters.windowStart,'MM')}/order_@{formatDateTime(pipeline().parameters.windowStart,'yyyy')}_@{formatDateTime(pipeline().parameters.windowStart,'MM')}_@{formatDateTime(pipeline().parameters.windowStart,'dd')}.csv"
+					}
+				],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": {
+							"value": "select * from [dbo].[BigOneFull] \nwhere [DDate] >= '@{formatDateTime(pipeline().parameters.windowStart, 'yyyy-MM-dd' )}' \nAND [DDate] < '@{formatDateTime(pipeline().parameters.windowEnd, 'yyyy-MM-dd' )}'",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"validateDataConsistency": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "FMCG_SQLServer_AG_Order",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ADLS_Raw_By_Date_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"cw_fileName": "order_@{formatDateTime(pipeline().parameters.windowStart,'yyyy')}_@{formatDateTime(pipeline().parameters.windowStart,'MM')}_@{formatDateTime(pipeline().parameters.windowStart,'dd')}.csv",
+							"cw_folderPath": {
+								"value": "ag_dwh_sink/ag_dwh_order/@{formatDateTime(pipeline().parameters.windowStart,'yyyy')}_@{formatDateTime(pipeline().parameters.windowStart,'MM')}",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Raw_to_Filtered",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Order_DB_to_Raw",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ADLS_Raw_By_Date_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"cw_fileName": "order_@{formatDateTime(pipeline().parameters.windowStart,'yyyy')}_@{formatDateTime(pipeline().parameters.windowStart,'MM')}_@{formatDateTime(pipeline().parameters.windowStart,'dd')}.csv",
+							"cw_folderPath": {
+								"value": "ag_dwh_sink/ag_dwh_order/@{formatDateTime(pipeline().parameters.windowStart,'yyyy')}_@{formatDateTime(pipeline().parameters.windowStart,'MM')}",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ADLS_Filtered_By_Date_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"cw_fileName": "order_@{formatDateTime(pipeline().parameters.windowStart,'yyyy')}_@{formatDateTime(pipeline().parameters.windowStart,'MM')}_@{formatDateTime(pipeline().parameters.windowStart,'dd')}.csv",
+							"cw_folderPath": {
+								"value": "ag_dwh_filtered/ag_dwh_order/@{formatDateTime(pipeline().parameters.windowStart,'yyyy')}_@{formatDateTime(pipeline().parameters.windowStart,'MM')}",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"windowStart": {
+				"type": "String"
+			},
+			"windowEnd": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "AG Pipelines/Order"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-01-14T11:07:31Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

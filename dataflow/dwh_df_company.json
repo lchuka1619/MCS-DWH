@@ -1,0 +1,98 @@
+{
+	"name": "dwh_df_company",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Dataset_Source",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Dataset_Sink",
+						"type": "DatasetReference"
+					},
+					"name": "sink1",
+					"rejectedDataLinkedService": {
+						"referenceName": "linkedService_err",
+						"type": "LinkedServiceReference"
+					}
+				}
+			],
+			"transformations": [
+				{
+					"name": "transform1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          COMPANYID as string,",
+				"          NAME as string,",
+				"          ADDRESS as string,",
+				"          CREATED as string,",
+				"          CREATEDBY as string,",
+				"          UPDATED as string,",
+				"          UPDATEDBY as string,",
+				"          IPADDRESS as string,",
+				"          MACADDRESS as string,",
+				"          TSTAMP as timestamp,",
+				"          BUSINESSTYPEID as long,",
+				"          PARENTID as string,",
+				"          REPGROUPID as string,",
+				"          PHONE as string,",
+				"          FAX as string,",
+				"          INTCOMPANYID as long,",
+				"          JDECOMPANY as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"source1 derive(company_code = COMPANYID,",
+				"          company_name = NAME,",
+				"          is_active = 1,",
+				"          source_system_code = '0',",
+				"          source_created_date = toTimestamp(CREATED, 'yyyy.MM.dd HH:mm:ss'),",
+				"          source_updated_date = toTimestamp(UPDATED, 'yyyy.MM.dd HH:mm:ss'),",
+				"          dw_created_date = currentUTC(),",
+				"          dw_updated_date = currentUTC()) ~> transform1",
+				"transform1 select(mapColumn(",
+				"          company_code,",
+				"          company_name,",
+				"          is_active,",
+				"          source_system_code,",
+				"          source_created_date,",
+				"          source_updated_date,",
+				"          dw_created_date,",
+				"          dw_updated_date",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 alterRow(upsertIf(!isNull(company_code))) ~> alterRow1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:true,",
+				"     keys:['company_code'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+			]
+		}
+	}
+}

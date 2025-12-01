@@ -1,0 +1,47 @@
+{
+	"name": "to_DWH_TBLEmployee",
+	"properties": {
+		"activities": [
+			{
+				"name": "Employee_From_Staging_to_DWH",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "Employee_From_Staging_to_DWH",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"source1": {
+								"cwfolder": "TBLEMPLOYEE"
+							},
+							"sink1": {
+								"cwtablename": "dim_employee"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine",
+					"runConcurrently": true,
+					"continueOnError": true
+				}
+			}
+		],
+		"folder": {
+			"name": "HR Pipelines/DW_Mysql"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-11-27T09:26:10Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

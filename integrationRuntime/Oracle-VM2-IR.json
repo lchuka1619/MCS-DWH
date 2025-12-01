@@ -1,0 +1,6 @@
+{
+	"name": "Oracle-VM2-IR",
+	"properties": {
+		"type": "SelfHosted"
+	}
+}

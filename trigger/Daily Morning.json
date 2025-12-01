@@ -1,0 +1,101 @@
+{
+	"name": "Daily Morning",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "AG_Small_Tables_Full_Extract",
+					"type": "PipelineReference"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "AG_MainDB_to_Raw",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"main_directory": "ag_dwh_sink"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "AG_Customer_Full_Flow",
+					"type": "PipelineReference"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "AG_Order_1d_Ago_Extract_CSV",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"windowStart": "@{addhours(trigger().scheduledTime, -24)}",
+					"windowEnd": "@trigger().scheduledTime"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "CC_Customer_Full_Flow",
+					"type": "PipelineReference"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "TD_Small_Tables_Full_Extract",
+					"type": "PipelineReference"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "CC_MainDB_to_Raw",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"main_directory": "cc_dwh_sink"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "TD_MainDB_to_Raw",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"main_directory": "td_dwh_sink"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "CC_Small_Tables_Full_Extract",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"main_directory": "cc_dwh_sink"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "TD_Customer_Full_Flow",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"src_customer_table": "BigOneFullCustomers_D",
+					"src_tradeshop_gps_table": "TradeshopGPS_TD",
+					"dest_folder": "td_dwh_sink",
+					"dest_customer_file": "td_dwh_full_customer.csv",
+					"dest_gps_file": "td_dwh_full_trade_shop_gps.csv"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2024-11-28T05:00:00",
+				"timeZone": "Ulaanbaatar Standard Time"
+			}
+		}
+	}
+}

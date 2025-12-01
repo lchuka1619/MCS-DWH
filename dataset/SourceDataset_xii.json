@@ -1,0 +1,25 @@
+{
+	"name": "SourceDataset_xii",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MCS_HR_GreenERP_SC",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cw_table": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"type": "OracleTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "HRMS_PROD",
+			"table": {
+				"value": "@dataset().cw_table",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

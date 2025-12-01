@@ -1,0 +1,221 @@
+{
+	"name": "AG_Small_Tables_Full_Extract",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy Products src to raw",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "FMCG_SQLServer_QVReports",
+						"type": "DatasetReference",
+						"parameters": {
+							"cw_table": "BigOneFullProducts"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ADLS_Raw_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"csv_fileName": "ag_dwh_full_product.csv",
+							"csv_directory": {
+								"value": "@pipeline().parameters.main_directory",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy GC src to raw",
+				"description": "copy user category data (Golden Contract) of AG from Source database to Raw storage",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy Products src to raw",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "FMCG_SQLServer_QVReports",
+						"type": "DatasetReference",
+						"parameters": {
+							"cw_table": "GC_History"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ADLS_Raw_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"csv_fileName": "ag_dwh_user_category_history.csv",
+							"csv_directory": {
+								"value": "@pipeline().parameters.main_directory",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy GOLDEN_CONTRACTS src to raw",
+				"description": "copy user category data (Golden Contract) of AG from Source database to Raw storage",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy GC src to raw",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "FMCG_SQLServer_QVReports",
+						"type": "DatasetReference",
+						"parameters": {
+							"cw_table": "GOLDEN_CONTRACTS"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ADLS_Raw_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"csv_fileName": "ag_dwh_user_category.csv",
+							"csv_directory": {
+								"value": "@pipeline().parameters.main_directory",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"main_directory": {
+				"type": "string",
+				"defaultValue": "ag_dwh_sink"
+			}
+		},
+		"folder": {
+			"name": "AG Pipelines"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-11-11T04:37:21Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

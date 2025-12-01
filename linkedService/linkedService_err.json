@@ -1,0 +1,12 @@
+{
+	"name": "linkedService_err",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"serviceEndpoint": "https://mcsdatalake.blob.core.windows.net/",
+			"accountKind": "StorageV2"
+		}
+	}
+}

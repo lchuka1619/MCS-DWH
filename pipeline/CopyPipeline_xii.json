@@ -1,0 +1,2731 @@
+{
+	"name": "CopyPipeline_xii",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach_xii",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.cw_items",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy_xii",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [
+								{
+									"name": "Source",
+									"value": "HRMS_PROD.@{item().source.table}"
+								},
+								{
+									"name": "Destination",
+									"value": "HRMS_PROD.@{item().destination.table}"
+								}
+							],
+							"typeProperties": {
+								"source": {
+									"type": "OracleSource",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"writeBehavior": {
+										"value": "@item().copySink.writeBehavior",
+										"type": "Expression"
+									},
+									"sqlWriterUseTableLock": {
+										"value": "@item().copySink.sqlWriterUseTableLock",
+										"type": "Expression"
+									},
+									"upsertSettings": {
+										"useTempDB": true,
+										"keys": {
+											"value": "@item().upsertSettings.keys",
+											"type": "Expression"
+										}
+									},
+									"tableOption": "autoCreate",
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"validateDataConsistency": false,
+								"logSettings": {
+									"enableCopyActivityLog": true,
+									"copyActivityLogSettings": {
+										"logLevel": "Warning",
+										"enableReliableLogging": false
+									},
+									"logLocationSettings": {
+										"linkedServiceName": {
+											"referenceName": "linkedService_err",
+											"type": "LinkedServiceReference"
+										},
+										"path": "error"
+									}
+								},
+								"translator": {
+									"value": "@item().copyActivity.translator",
+									"type": "Expression"
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "SourceDataset_xii",
+									"type": "DatasetReference",
+									"parameters": {
+										"cw_table": "@item().source.table"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DestinationDataset_xii",
+									"type": "DatasetReference",
+									"parameters": {
+										"cw_table": "@item().destination.table"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"cw_items": {
+				"type": "Array",
+				"defaultValue": [
+					{
+						"source": {
+							"table": "SIGRADE"
+						},
+						"destination": {
+							"table": "SIGRADE"
+						},
+						"copySink": {
+							"writeBehavior": "upsert",
+							"sqlWriterUseTableLock": false
+						},
+						"copyActivity": {
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "GRADEID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "GRADEID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "CODE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CODE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "GRADENO",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "GRADENO",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "NAME",
+											"type": "String"
+										},
+										"sink": {
+											"name": "NAME",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ISACTIVE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ISACTIVE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CREATED",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CREATED",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CREATEDBY",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CREATEDBY",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "UPDATED",
+											"type": "String"
+										},
+										"sink": {
+											"name": "UPDATED",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "UPDATEDBY",
+											"type": "String"
+										},
+										"sink": {
+											"name": "UPDATEDBY",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "IPADDRESS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "IPADDRESS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "MACADDRESS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "MACADDRESS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "TSTAMP",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "TSTAMP",
+											"type": "DateTime",
+											"physicalType": "datetime2"
+										}
+									},
+									{
+										"source": {
+											"name": "MASTERID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "MASTERID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "ISMASTER",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ISMASTER",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "GRADETYPEID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "GRADETYPEID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"GRADEID"
+							]
+						}
+					},
+					{
+						"source": {
+							"table": "SILEVEL"
+						},
+						"destination": {
+							"table": "SILEVEL"
+						},
+						"copySink": {
+							"writeBehavior": "upsert",
+							"sqlWriterUseTableLock": false
+						},
+						"copyActivity": {
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "LEVELID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "LEVELID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "CODE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CODE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "NAME",
+											"type": "String"
+										},
+										"sink": {
+											"name": "NAME",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ISACTIVE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ISACTIVE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CREATED",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CREATED",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CREATEDBY",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CREATEDBY",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "UPDATED",
+											"type": "String"
+										},
+										"sink": {
+											"name": "UPDATED",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "UPDATEDBY",
+											"type": "String"
+										},
+										"sink": {
+											"name": "UPDATEDBY",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "IPADDRESS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "IPADDRESS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "MACADDRESS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "MACADDRESS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "TSTAMP",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "TSTAMP",
+											"type": "DateTime",
+											"physicalType": "datetime2"
+										}
+									},
+									{
+										"source": {
+											"name": "MASTERID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "MASTERID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "ISMASTER",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ISMASTER",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"LEVELID"
+							]
+						}
+					},
+					{
+						"source": {
+							"table": "TBLCOMPANY"
+						},
+						"destination": {
+							"table": "TBLCOMPANY"
+						},
+						"copySink": {
+							"writeBehavior": "upsert",
+							"sqlWriterUseTableLock": false
+						},
+						"copyActivity": {
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "COMPANYID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "COMPANYID",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "NAME",
+											"type": "String"
+										},
+										"sink": {
+											"name": "NAME",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ADDRESS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ADDRESS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CREATED",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CREATED",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CREATEDBY",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CREATEDBY",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "UPDATED",
+											"type": "String"
+										},
+										"sink": {
+											"name": "UPDATED",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "UPDATEDBY",
+											"type": "String"
+										},
+										"sink": {
+											"name": "UPDATEDBY",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "IPADDRESS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "IPADDRESS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "MACADDRESS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "MACADDRESS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "TSTAMP",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "TSTAMP",
+											"type": "DateTime",
+											"physicalType": "datetime2"
+										}
+									},
+									{
+										"source": {
+											"name": "BUSINESSTYPEID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "BUSINESSTYPEID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "PARENTID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "PARENTID",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "REPGROUPID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "REPGROUPID",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "PHONE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "PHONE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "FAX",
+											"type": "String"
+										},
+										"sink": {
+											"name": "FAX",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "INTCOMPANYID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "INTCOMPANYID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "JDECOMPANY",
+											"type": "String"
+										},
+										"sink": {
+											"name": "JDECOMPANY",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"COMPANYID"
+							]
+						}
+					},
+					{
+						"source": {
+							"table": "TBLDEPARTMENT"
+						},
+						"destination": {
+							"table": "TBLDEPARTMENT"
+						},
+						"copySink": {
+							"writeBehavior": "upsert",
+							"sqlWriterUseTableLock": null
+						},
+						"copyActivity": {
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "DEPID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "DEPID",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "DEPCODE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "DEPCODE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "NAME",
+											"type": "String"
+										},
+										"sink": {
+											"name": "NAME",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ISACTIVE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ISACTIVE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "PARENTID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "PARENTID",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CREATED",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CREATED",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CREATEDBY",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CREATEDBY",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "UPDATED",
+											"type": "String"
+										},
+										"sink": {
+											"name": "UPDATED",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "UPDATEDBY",
+											"type": "String"
+										},
+										"sink": {
+											"name": "UPDATEDBY",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "IPADDRESS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "IPADDRESS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "MACADDRESS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "MACADDRESS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "TSTAMP",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "TSTAMP",
+											"type": "DateTime",
+											"physicalType": "datetime2"
+										}
+									},
+									{
+										"source": {
+											"name": "COMPANYID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "COMPANYID",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "DEPTYPEID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "DEPTYPEID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "PATH",
+											"type": "String"
+										},
+										"sink": {
+											"name": "PATH",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "PARENTPATH",
+											"type": "String"
+										},
+										"sink": {
+											"name": "PARENTPATH",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "REPGROUPID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "REPGROUPID",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "INTDEPID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "INTDEPID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "INTPARENTID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "INTPARENTID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "DEPTYPE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "DEPTYPE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "LDAPPATH",
+											"type": "String"
+										},
+										"sink": {
+											"name": "LDAPPATH",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ISPROVINCE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ISPROVINCE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ESTABLISHEDDATE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ESTABLISHEDDATE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "SHOWONORGCHART",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SHOWONORGCHART",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "FAPURPOSEID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "FAPURPOSEID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"DEPID"
+							]
+						}
+					},
+					{
+						"source": {
+							"table": "TBLEMPEMPLHIST"
+						},
+						"destination": {
+							"table": "TBLEMPEMPLHIST"
+						},
+						"copySink": {
+							"writeBehavior": "upsert",
+							"sqlWriterUseTableLock": null
+						},
+						"copyActivity": {
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "HISTORYID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "HISTORYID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "EMPID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "EMPID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "BEGINDATE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "BEGINDATE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ENDDATE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ENDDATE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ORDERID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "ORDERID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "ORDERTYPE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ORDERTYPE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "COMPANYID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "COMPANYID",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "DEPID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "DEPID",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "POSITIONID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "POSITIONID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "GRADEID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "GRADEID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "LEVELID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "LEVELID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "BASEWAGE",
+											"type": "Decimal",
+											"scale": 4,
+											"precision": 18
+										},
+										"sink": {
+											"name": "BASEWAGE",
+											"type": "Decimal",
+											"physicalType": "decimal"
+										}
+									},
+									{
+										"source": {
+											"name": "BASEWAGECURRCODE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "BASEWAGECURRCODE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "TSTAMP",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "TSTAMP",
+											"type": "DateTime",
+											"physicalType": "datetime2"
+										}
+									},
+									{
+										"source": {
+											"name": "CREATED",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CREATED",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CREATEDBY",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CREATEDBY",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "UPDATED",
+											"type": "String"
+										},
+										"sink": {
+											"name": "UPDATED",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "UPDATEDBY",
+											"type": "String"
+										},
+										"sink": {
+											"name": "UPDATEDBY",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "IPADDRESS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "IPADDRESS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "MACADDRESS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "MACADDRESS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ORDERNO",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ORDERNO",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ISMANUALHIST",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ISMANUALHIST",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ISNOTLOCALHIST",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ISNOTLOCALHIST",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "LEGALENTITYID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "LEGALENTITYID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "OLDDEPNAME",
+											"type": "String"
+										},
+										"sink": {
+											"name": "OLDDEPNAME",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "JOBID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "JOBID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "NOTE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "NOTE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "INSURETYPEID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "INSURETYPEID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "LABOURCONDITION",
+											"type": "String"
+										},
+										"sink": {
+											"name": "LABOURCONDITION",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ISMULT",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ISMULT",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "MULTYEAR",
+											"type": "Decimal",
+											"scale": 4,
+											"precision": 18
+										},
+										"sink": {
+											"name": "MULTYEAR",
+											"type": "Decimal",
+											"physicalType": "decimal"
+										}
+									},
+									{
+										"source": {
+											"name": "HISTREASON",
+											"type": "String"
+										},
+										"sink": {
+											"name": "HISTREASON",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "HISTREASONNAMES",
+											"type": "String"
+										},
+										"sink": {
+											"name": "HISTREASONNAMES",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "TOTALWAGE",
+											"type": "Decimal",
+											"scale": 4,
+											"precision": 18
+										},
+										"sink": {
+											"name": "TOTALWAGE",
+											"type": "Decimal",
+											"physicalType": "decimal"
+										}
+									},
+									{
+										"source": {
+											"name": "EVOLVEWAGE",
+											"type": "Decimal",
+											"scale": 4,
+											"precision": 18
+										},
+										"sink": {
+											"name": "EVOLVEWAGE",
+											"type": "Decimal",
+											"physicalType": "decimal"
+										}
+									},
+									{
+										"source": {
+											"name": "CALCPERCENT",
+											"type": "Decimal",
+											"scale": 4,
+											"precision": 18
+										},
+										"sink": {
+											"name": "CALCPERCENT",
+											"type": "Decimal",
+											"physicalType": "decimal"
+										}
+									},
+									{
+										"source": {
+											"name": "GRADETYPEID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "GRADETYPEID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "LEVELNO",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "LEVELNO",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "FTEMAINID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "FTEMAINID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"HISTORYID"
+							]
+						}
+					},
+					{
+						"source": {
+							"table": "TBLEMPLOYEE"
+						},
+						"destination": {
+							"table": "TBLEMPLOYEE"
+						},
+						"copySink": {
+							"writeBehavior": "upsert",
+							"sqlWriterUseTableLock": null
+						},
+						"copyActivity": {
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "EMPID",
+											"type": "Decimal",
+											"scale": 0,
+											"precision": 20
+										},
+										"sink": {
+											"name": "EMPID",
+											"type": "Decimal",
+											"physicalType": "decimal"
+										}
+									},
+									{
+										"source": {
+											"name": "CODE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CODE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "FAMILYNAME",
+											"type": "String"
+										},
+										"sink": {
+											"name": "FAMILYNAME",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "LASTNAME",
+											"type": "String"
+										},
+										"sink": {
+											"name": "LASTNAME",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "FIRSTNAME",
+											"type": "String"
+										},
+										"sink": {
+											"name": "FIRSTNAME",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "GENDER",
+											"type": "String"
+										},
+										"sink": {
+											"name": "GENDER",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "BIRTHDATE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "BIRTHDATE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "BIRTHCOUNTRYID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "BIRTHCOUNTRYID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "BIRTHDIVISIONID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "BIRTHDIVISIONID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "BIRTHDISTRICTID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "BIRTHDISTRICTID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "BIRTHPLACE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "BIRTHPLACE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "COUNTRYID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "COUNTRYID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "DIVISIONID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "DIVISIONID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "DISTRICTID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "DISTRICTID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "NATIONALITYID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "NATIONALITYID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "SOCIALORIGINID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "SOCIALORIGINID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "MARITALSTATUS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "MARITALSTATUS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "BLOODGROUP",
+											"type": "String"
+										},
+										"sink": {
+											"name": "BLOODGROUP",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "REGNO",
+											"type": "String"
+										},
+										"sink": {
+											"name": "REGNO",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "PASSNO",
+											"type": "String"
+										},
+										"sink": {
+											"name": "PASSNO",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "FORPASSNO",
+											"type": "String"
+										},
+										"sink": {
+											"name": "FORPASSNO",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "EMDNO",
+											"type": "String"
+										},
+										"sink": {
+											"name": "EMDNO",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "NDDNO",
+											"type": "String"
+										},
+										"sink": {
+											"name": "NDDNO",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ADDR1",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ADDR1",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ADDR2",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ADDR2",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "HOMEPHONE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "HOMEPHONE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "MOBILEPHONE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "MOBILEPHONE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "WORKPHONE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "WORKPHONE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "WORKPHONEEXT",
+											"type": "String"
+										},
+										"sink": {
+											"name": "WORKPHONEEXT",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "FAX",
+											"type": "String"
+										},
+										"sink": {
+											"name": "FAX",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "EMAIL",
+											"type": "String"
+										},
+										"sink": {
+											"name": "EMAIL",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "POSTADDRESS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "POSTADDRESS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CONTACTNAME",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CONTACTNAME",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CONTACTPHONE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CONTACTPHONE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "WITHPICTURE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "WITHPICTURE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "STATUS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "STATUS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CREATED",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CREATED",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CREATEDBY",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CREATEDBY",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "UPDATED",
+											"type": "String"
+										},
+										"sink": {
+											"name": "UPDATED",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "UPDATEDBY",
+											"type": "String"
+										},
+										"sink": {
+											"name": "UPDATEDBY",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "IPADDRESS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "IPADDRESS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "MACADDRESS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "MACADDRESS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "TSTAMP",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "TSTAMP",
+											"type": "DateTime",
+											"physicalType": "datetime2"
+										}
+									},
+									{
+										"source": {
+											"name": "COMPANYID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "COMPANYID",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "STATUSDATE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "STATUSDATE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "LASTNAMELENGTH",
+											"type": "Decimal",
+											"scale": 0,
+											"precision": 38
+										},
+										"sink": {
+											"name": "LASTNAMELENGTH",
+											"type": "Decimal",
+											"physicalType": "decimal"
+										}
+									},
+									{
+										"source": {
+											"name": "EMAIL2",
+											"type": "String"
+										},
+										"sink": {
+											"name": "EMAIL2",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CONTACTNAME2",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CONTACTNAME2",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CONTACTPHONE2",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CONTACTPHONE2",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ISBLACKLISTED",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ISBLACKLISTED",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "BLACKLISTREASON",
+											"type": "String"
+										},
+										"sink": {
+											"name": "BLACKLISTREASON",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "BLACKLISTEDDATE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "BLACKLISTEDDATE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ISFOREIGNER",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ISFOREIGNER",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CONTACTID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "CONTACTID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "MILITARYSERVED",
+											"type": "String"
+										},
+										"sink": {
+											"name": "MILITARYSERVED",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "TRAININGSPORT",
+											"type": "String"
+										},
+										"sink": {
+											"name": "TRAININGSPORT",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "INTEREST",
+											"type": "String"
+										},
+										"sink": {
+											"name": "INTEREST",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "APPID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "APPID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "MILITARYNO",
+											"type": "String"
+										},
+										"sink": {
+											"name": "MILITARYNO",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "RELATIVEID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "RELATIVEID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "RELATIVEID2",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "RELATIVEID2",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "MILITARYCLOSETYPE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "MILITARYCLOSETYPE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "MILITARYCOMMENT",
+											"type": "String"
+										},
+										"sink": {
+											"name": "MILITARYCOMMENT",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "LINKEDIN",
+											"type": "String"
+										},
+										"sink": {
+											"name": "LINKEDIN",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "FACEBOOK",
+											"type": "String"
+										},
+										"sink": {
+											"name": "FACEBOOK",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "TWITTER",
+											"type": "String"
+										},
+										"sink": {
+											"name": "TWITTER",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ISSPYOATH",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ISSPYOATH",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "SPYOATHDATE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SPYOATHDATE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ISGOVERNMENTOATH",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ISGOVERNMENTOATH",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "GOVERNMENTOATHDATE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "GOVERNMENTOATHDATE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ISMILITARYOATH",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ISMILITARYOATH",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "MILITARYOATHDATE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "MILITARYOATHDATE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "LINKID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "LINKID",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ISRESIDENT",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ISRESIDENT",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CIVILID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CIVILID",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"EMPID"
+							]
+						}
+					},
+					{
+						"source": {
+							"table": "TBLPOSITION"
+						},
+						"destination": {
+							"table": "TBLPOSITION"
+						},
+						"copySink": {
+							"writeBehavior": "upsert",
+							"sqlWriterUseTableLock": null
+						},
+						"copyActivity": {
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "POSITIONID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "POSITIONID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "COMPANYID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "COMPANYID",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "DEPID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "DEPID",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "POSGROUPID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "POSGROUPID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "CODE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CODE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "NAME",
+											"type": "String"
+										},
+										"sink": {
+											"name": "NAME",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "EMPLOYMENTTYPEID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "EMPLOYMENTTYPEID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "GRADEID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "GRADEID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "DIRECTPOSITIONID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "DIRECTPOSITIONID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "NONDIRECTPOSITIONID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "NONDIRECTPOSITIONID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "REPORTPOSITIONID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "REPORTPOSITIONID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "GOAL",
+											"type": "String"
+										},
+										"sink": {
+											"name": "GOAL",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CHARACTERISTIC",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CHARACTERISTIC",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "VACANCYDAYS",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "VACANCYDAYS",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "LABOURCONDITION",
+											"type": "String"
+										},
+										"sink": {
+											"name": "LABOURCONDITION",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ISACTIVE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ISACTIVE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CREATED",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CREATED",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CREATEDBY",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CREATEDBY",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "UPDATED",
+											"type": "String"
+										},
+										"sink": {
+											"name": "UPDATED",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "UPDATEDBY",
+											"type": "String"
+										},
+										"sink": {
+											"name": "UPDATEDBY",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "IPADDRESS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "IPADDRESS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "MACADDRESS",
+											"type": "String"
+										},
+										"sink": {
+											"name": "MACADDRESS",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "TSTAMP",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "TSTAMP",
+											"type": "DateTime",
+											"physicalType": "datetime2"
+										}
+									},
+									{
+										"source": {
+											"name": "JOBDESCID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "JOBDESCID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "JOBID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "JOBID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "TYPE",
+											"type": "String"
+										},
+										"sink": {
+											"name": "TYPE",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "POSITIONOCCID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "POSITIONOCCID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "POSLEVEL",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "POSLEVEL",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "JDECOSTCENTER",
+											"type": "String"
+										},
+										"sink": {
+											"name": "JDECOSTCENTER",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "JDE_F0006_CO",
+											"type": "String"
+										},
+										"sink": {
+											"name": "JDE_F0006_CO",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "JDE_F0006_RP01",
+											"type": "String"
+										},
+										"sink": {
+											"name": "JDE_F0006_RP01",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "JDE_F0006_RP02",
+											"type": "String"
+										},
+										"sink": {
+											"name": "JDE_F0006_RP02",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "POSCATEGORYID",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "POSCATEGORYID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"POSITIONID"
+							]
+						}
+					}
+				]
+			}
+		},
+		"folder": {
+			"name": "HR Pipelines/DW"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-11-27T09:26:11Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

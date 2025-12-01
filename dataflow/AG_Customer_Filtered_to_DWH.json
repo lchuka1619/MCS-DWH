@@ -1,0 +1,163 @@
+{
+	"name": "AG_Customer_Filtered_to_DWH",
+	"properties": {
+		"folder": {
+			"name": "AG"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ADLS_Filtered_CSV",
+						"type": "DatasetReference"
+					},
+					"name": "agCustomerFiltered",
+					"description": "ADLS deerh fmcg-filtered container-ees ag_dwh_filtered/ag_dwh_customer_full.csv datag avah process. Ene ni customer datag aguulsan bga"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DWH_Mysql",
+						"type": "DatasetReference"
+					},
+					"name": "agCustomerDWH"
+				},
+				{
+					"dataset": {
+						"referenceName": "DWH_Mysql",
+						"type": "DatasetReference"
+					},
+					"name": "agTradeShopDWH"
+				}
+			],
+			"transformations": [
+				{
+					"name": "CustomerTable",
+					"description": "customer_register (INN), customer_ag_id(OwnerID)-aar groupleed uldsen medeelluudiig aggregate hiigeed customer table gargaj avna."
+				},
+				{
+					"name": "AlterCustomerTable",
+					"description": "Database ruu upsert hiih bolomjiig bii bolgoh"
+				},
+				{
+					"name": "notNullCustomers",
+					"description": "0 (null) registertei bas null owner_id-tai hariltsagchdiig ylgaj avah"
+				},
+				{
+					"name": "CustomerInfoFix",
+					"description": "Customer register ni null, esvel formataas zursun uyd tuuniig '0' bolgoh, format ni 7 orontoi too esvel hunii RD bh ystoi"
+				},
+				{
+					"name": "TradeShopTable",
+					"description": "niit medeellees tradeshop-iin medeelel gargan avch DWH ruu hadgalah"
+				},
+				{
+					"name": "FilterOutUnknownTradeshops"
+				},
+				{
+					"name": "TradeshopFix",
+					"description": "trade_shop_ag_id (cusid), trade_shop_id_check (tradeshop_id) nariin utguud null bgaa tohioldold nuguuguur ni nuhuh, esvel 0-eer nuhnu"
+				},
+				{
+					"name": "GroupByTradeshop",
+					"description": "Tradeshop datagaa trade_shop_ag_id, trade_shop_id_check columnuudaar grouplej davhardliig arilgana"
+				},
+				{
+					"name": "AlterTradeShopTable"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          cusid_ag as integer,",
+				"          trade_shop_name as string,",
+				"          full_address as string,",
+				"          isis_channel_id as integer,",
+				"          customer_ag_id as integer,",
+				"          customer_name as string,",
+				"          customer_register as string,",
+				"          trade_shop_ag_id as integer,",
+				"          store_type_name as string,",
+				"          phone_number as string,",
+				"          customer_created_date as string,",
+				"          longitude as string,",
+				"          latitude as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> agCustomerFiltered",
+				"notNullCustomers@notNullCustomers aggregate(groupBy(customer_register,",
+				"          customer_ag_id),",
+				"     customer_name = iifNull(min(customer_name), min(trade_shop_name)),",
+				"          full_address = min(full_address),",
+				"          is_reliable_register = iif(max(customer_register) == '0', 0, 1),",
+				"          register_type = iif(regexMatch(min(customer_register),  `^\\d+$`), 1,  0),",
+				"          phone_number = max(phone_number),",
+				"          customer_created_date = min(customer_created_date)) ~> CustomerTable",
+				"CustomerTable alterRow(upsertIf(true())) ~> AlterCustomerTable",
+				"CustomerInfoFix split(!and(customer_register == '0', isNull(customer_ag_id)),",
+				"     disjoint: false) ~> notNullCustomers@(notNullCustomers, nullCustomers)",
+				"agCustomerFiltered derive(customer_register = trim(iif(length(customer_register) <= 6, '0', iifNull(customer_register, '0'))),",
+				"          register_fixed = iif(length(customer_register) <= 6, 1, iif(or(customer_register == '1000000', customer_register == '888888888'), 1, 0))) ~> CustomerInfoFix",
+				"CustomerInfoFix select(mapColumn(",
+				"          trade_shop_ag_id = cusid_ag,",
+				"          trade_shop_name,",
+				"          customer_ag_id,",
+				"          full_address,",
+				"          longitude,",
+				"          latitude,",
+				"          phone_number,",
+				"          isis_channel_id,",
+				"          trade_shop_id_check = trade_shop_ag_id,",
+				"          store_type_name,",
+				"          trade_shop_created_date = customer_created_date,",
+				"          customer_register",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> TradeShopTable",
+				"TradeShopTable filter(!and(isNull(trade_shop_ag_id), isNull(trade_shop_id_check))) ~> FilterOutUnknownTradeshops",
+				"FilterOutUnknownTradeshops derive(trade_shop_ag_id = iifNull(trade_shop_ag_id, trade_shop_id_check, 0),",
+				"          is_reliable_trade_shop_ag_id = iif(isNull(trade_shop_ag_id), 0, 1),",
+				"          trade_shop_id_check = iifNull(trade_shop_id_check, trade_shop_ag_id, 0),",
+				"          is_reliable_trade_shop_id_check = iif(isNull(trade_shop_id_check), 0, 1)) ~> TradeshopFix",
+				"TradeshopFix aggregate(groupBy(trade_shop_ag_id,",
+				"          trade_shop_id_check),",
+				"     is_reliable_trade_shop_ag_id = max(is_reliable_trade_shop_ag_id),",
+				"          trade_shop_name = max(trade_shop_name),",
+				"          full_address = max(full_address),",
+				"          longitude = first(longitude),",
+				"          latitude = first(latitude),",
+				"          phone_number = max(phone_number),",
+				"          isis_channel_id = max(isis_channel_id),",
+				"          is_reliable_trade_shop_id_check = max(is_reliable_trade_shop_id_check),",
+				"          store_type_name = max(store_type_name),",
+				"          trade_shop_created_date = min(trade_shop_created_date),",
+				"          customer_register = max(customer_register),",
+				"          customer_ag_id = max(customer_ag_id)) ~> GroupByTradeshop",
+				"GroupByTradeshop alterRow(upsertIf(true())) ~> AlterTradeShopTable",
+				"AlterCustomerTable sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:true,",
+				"     keys:['customer_register','customer_ag_id'],",
+				"     format: 'table',",
+				"     batchSize: 5000,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> agCustomerDWH",
+				"AlterTradeShopTable sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:true,",
+				"     keys:['trade_shop_ag_id','trade_shop_id_check'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> agTradeShopDWH"
+			]
+		}
+	}
+}

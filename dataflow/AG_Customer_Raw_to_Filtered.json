@@ -1,0 +1,108 @@
+{
+	"name": "AG_Customer_Raw_to_Filtered",
+	"properties": {
+		"folder": {
+			"name": "AG"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ADLS_Raw_CSV",
+						"type": "DatasetReference"
+					},
+					"name": "agRawFullCustomerCSV"
+				},
+				{
+					"dataset": {
+						"referenceName": "ADLS_Raw_CSV",
+						"type": "DatasetReference"
+					},
+					"name": "agRawTradeShopGpsCSV"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ADLS_Filtered_CSV",
+						"type": "DatasetReference"
+					},
+					"name": "agFilteredCSV"
+				}
+			],
+			"transformations": [
+				{
+					"name": "TradeShopIDLeftJoin"
+				},
+				{
+					"name": "ColumnFiltering",
+					"description": "Renaming and (removing) TradeShopIDLeftJoin to ColumnFiltering with columns"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          CusID as integer,",
+				"          CusName as string,",
+				"          cusAddress as string,",
+				"          ISISChannelID as integer,",
+				"          OwnerID as integer,",
+				"          OwnerName as string,",
+				"          INN as string,",
+				"          TradeShopID as integer,",
+				"          StoreTypeName as string,",
+				"          Phone as string,",
+				"          CreateDate as string,",
+				"          UpdateDate as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     partitionBy('hash', 1)) ~> agRawFullCustomerCSV",
+				"source(output(",
+				"          TradeshopID as integer,",
+				"          CreatedDate as string,",
+				"          UpdatedDate as string,",
+				"          UID as string,",
+				"          Longitude as string,",
+				"          Latitude as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     partitionBy('hash', 1)) ~> agRawTradeShopGpsCSV",
+				"agRawFullCustomerCSV, agRawTradeShopGpsCSV join(agRawFullCustomerCSV@TradeShopID == agRawTradeShopGpsCSV@TradeshopID,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'off')~> TradeShopIDLeftJoin",
+				"TradeShopIDLeftJoin select(mapColumn(",
+				"          cusid_ag = CusID,",
+				"          trade_shop_name = CusName,",
+				"          full_address = cusAddress,",
+				"          isis_channel_id = ISISChannelID,",
+				"          customer_ag_id = OwnerID,",
+				"          customer_name = OwnerName,",
+				"          customer_register = INN,",
+				"          trade_shop_ag_id = agRawFullCustomerCSV@TradeShopID,",
+				"          store_type_name = StoreTypeName,",
+				"          phone_number = Phone,",
+				"          customer_created_date = CreateDate,",
+				"          longitude = Longitude,",
+				"          latitude = Latitude",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> ColumnFiltering",
+				"ColumnFiltering sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['ag_dwh_customer_full.csv'],",
+				"     umask: 0775,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> agFilteredCSV"
+			]
+		}
+	}
+}
